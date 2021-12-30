@@ -1,0 +1,1017 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <title>Go Asm - 静心台--keep learning and keep moving</title>
+  <meta name="renderer" content="webkit" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+<meta name="theme-color" content="#f8f5ec" />
+<meta name="msapplication-navbutton-color" content="#f8f5ec">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
+
+
+<meta name="author" content="ipeapea" /><meta name="description" content="go汇编入门介绍" /><meta name="keywords" content="go, asm" />
+
+
+
+
+
+
+<meta name="generator" content="Hugo 0.82.0 with theme even" />
+
+
+<link rel="canonical" href="https://www.ipeapea.cn/post/go-asm/" />
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="manifest" href="/manifest.json">
+<link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
+
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+<link href="/sass/main.min.548ea1653e68f925e56a61a2d6231c74fd8bf61fa6007a23a36d99d3058899e3.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.css" integrity="sha256-7TyXnr2YU040zfSP+rEcz29ggW4j56/ujTPwjMzyqFY=" crossorigin="anonymous">
+
+
+<meta property="og:title" content="Go Asm" />
+<meta property="og:description" content="go汇编入门介绍" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://www.ipeapea.cn/post/go-asm/" /><meta property="article:section" content="post" />
+<meta property="article:published_time" content="2021-04-15T02:09:52&#43;08:00" />
+<meta property="article:modified_time" content="2021-04-15T02:09:52&#43;08:00" />
+
+<meta itemprop="name" content="Go Asm">
+<meta itemprop="description" content="go汇编入门介绍"><meta itemprop="datePublished" content="2021-04-15T02:09:52&#43;08:00" />
+<meta itemprop="dateModified" content="2021-04-15T02:09:52&#43;08:00" />
+<meta itemprop="wordCount" content="5107">
+<meta itemprop="keywords" content="go,asm," /><meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Go Asm"/>
+<meta name="twitter:description" content="go汇编入门介绍"/>
+
+<!--[if lte IE 9]>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js"></script>
+<![endif]-->
+
+<!--[if lt IE 9]>
+  <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+<![endif]-->
+
+</head>
+<body>
+  <div id="mobile-navbar" class="mobile-navbar">
+  <div class="mobile-header-logo">
+    <a href="/" class="logo">静心台</a>
+  </div>
+  <div class="mobile-navbar-icon">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+</div>
+<nav id="mobile-menu" class="mobile-menu slideout-menu">
+  <ul class="mobile-menu-list">
+    <a href="/">
+        <li class="mobile-menu-item">Home</li>
+      </a><a href="/post/">
+        <li class="mobile-menu-item">Archives</li>
+      </a><a href="/live/">
+        <li class="mobile-menu-item">Life</li>
+      </a><a href="/tags/">
+        <li class="mobile-menu-item">Tags</li>
+      </a><a href="/about/">
+        <li class="mobile-menu-item">About</li>
+      </a>
+  </ul>
+
+  
+
+
+</nav>
+
+  <div class="container" id="mobile-panel">
+    <header id="header" class="header">
+        <div class="logo-wrapper">
+  <a href="/" class="logo">静心台</a>
+</div>
+
+
+
+
+
+<nav class="site-navbar">
+  <ul id="menu" class="menu">
+    <li class="menu-item">
+        <a class="menu-item-link" href="/">Home</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/post/">Archives</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/live/">Life</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/tags/">Tags</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/about/">About</a>
+      </li>
+  </ul>
+</nav>
+
+    </header>
+
+    <main id="main" class="main">
+      <div class="content-wrapper">
+        <div id="content" class="content">
+          <article class="post">
+    
+    <header class="post-header">
+      <h1 class="post-title">Go Asm</h1>
+
+      <div class="post-meta">
+        <span class="post-time"> 2021-04-15 </span>
+        <div class="post-category">
+            <a href="/categories/go/"> go </a>
+            </div>
+          <span class="more-meta"> 约 5107 字 </span>
+          <span class="more-meta"> 预计阅读 11 分钟 </span>
+        <span id="busuanzi_container_page_pv" class="more-meta"> <span id="busuanzi_value_page_pv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> 次阅读 </span>
+      </div>
+    </header>
+
+    <div class="post-toc" id="post-toc">
+  <h2 class="post-toc-title">文章目录</h2>
+  <div class="post-toc-content always-active">
+    <nav id="TableOfContents">
+  <ul>
+    <li><a href="#为什么想分享这个知识点">为什么想分享这个知识点</a></li>
+    <li><a href="#前置知识点">前置知识点</a>
+      <ul>
+        <li><a href="#进程内存布局">进程内存布局</a></li>
+        <li><a href="#go-asm">GO ASM</a></li>
+        <li><a href="#几个相关的概念">几个相关的概念</a></li>
+        <li><a href="#go-调用约定">GO 调用约定</a></li>
+        <li><a href="#go-routine栈帧布局">GO routine栈帧布局</a></li>
+        <li><a href="#常见指令">常见指令</a></li>
+        <li><a href="#函数声明">函数声明</a></li>
+      </ul>
+    </li>
+    <li><a href="#talk-is-cheap-show-me-code">Talk is cheap, Show me code</a>
+      <ul>
+        <li><a href="#实例">实例</a></li>
+      </ul>
+    </li>
+    <li><a href="#手动写汇编">手动写汇编</a></li>
+    <li><a href="#回过头来看那几个重要寄存器">回过头来看那几个重要寄存器</a></li>
+    <li><a href="#分享总结">分享总结</a>
+      <ul>
+        <li><a href="#想达到的目的">想达到的目的</a></li>
+        <li><a href="#适度">适度</a></li>
+      </ul>
+    </li>
+    <li><a href="#参考资料">参考资料</a></li>
+  </ul>
+</nav>
+  </div>
+</div>
+    <div class="post-content">
+      <blockquote>
+<p>本文最初是在公司内部小组技术分享</p>
+</blockquote>
+<h2 id="为什么想分享这个知识点">为什么想分享这个知识点</h2>
+<ul>
+<li>经常性在阅读GO源码时，会追溯到底层的汇编实现，如果不理解，就会懵逼了</li>
+<li>网上大量的大神在分析某个特性或者实现时，常常都会祭出底层汇编，这也说明，要明白GO底层的很多设计，都必须要了解GO汇编</li>
+<li>性能优化，代码分析所需，虽然这种情况很少</li>
+<li>了解底层实现，充实自己的武器库</li>
+<li>具备部分辩伪能力，学习了GO汇编，多少会对语言特性的底层实现有一些嗅觉</li>
+<li>装逼，装逼是第一生产力</li>
+</ul>
+<!-- raw HTML omitted -->
+<p><img src="/images/zhuangbi.png" alt=""></p>
+<h2 id="前置知识点">前置知识点</h2>
+<h3 id="进程内存布局">进程内存布局</h3>
+<p>进程在内存中的布局主要分为4个区域：代码区，数据区，堆和栈
+<!-- raw HTML omitted -->
+<img src="/images/%E8%BF%9B%E7%A8%8B%E5%86%85%E5%AD%98%E5%B8%83%E5%B1%80.png" alt=""></p>
+<h3 id="go-asm">GO ASM</h3>
+<ul>
+<li>GO汇编并不对应某种真实的硬件架构，可以理解为是一种伪汇编语言，初衷是想做到架构无关、可移植，但现状是骨感的，源码中随处可见一个函数不同架构的汇编源码实现。</li>
+<li>GO ASM 基于PLAN 9，自定义了几个平台通用的伪寄存器。</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>X64</th>
+<th>rax</th>
+<th>rbx</th>
+<th>rcx</th>
+<th>rdx</th>
+<th>rdi</th>
+<th>rsi</th>
+<th>rbp</th>
+<th>rsp</th>
+<th>r8</th>
+<th>r9</th>
+<th>r10</th>
+<th>r11</th>
+<th>r12</th>
+<th>r13</th>
+<th>r14</th>
+<th>rip</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Plan9</td>
+<td>AX</td>
+<td>BX</td>
+<td>CX</td>
+<td>DX</td>
+<td>DI</td>
+<td>SI</td>
+<td>BP</td>
+<td>SP</td>
+<td>R8</td>
+<td>R9</td>
+<td>R10</td>
+<td>R11</td>
+<td>R12</td>
+<td>R13</td>
+<td>R14</td>
+<td>PC</td>
+</tr>
+</tbody>
+</table>
+<p>GO 汇编自定义的伪寄存器，具体定义见<a href="https://golang.org/doc/asm">go官网文档asm</a></p>
+<blockquote>
+<ul>
+<li><code>FP</code>: Frame pointer: arguments and locals.</li>
+<li><code>PC</code>: Program counter: jumps and branches.</li>
+<li><code>SB</code>: Static base pointer: global symbols.</li>
+<li><code>SP</code>: Stack pointer: top of stack.</li>
+<li><code>BP</code>: Base Pointer: base of frame Pointer</li>
+</ul>
+</blockquote>
+<h3 id="几个相关的概念">几个相关的概念</h3>
+<ul>
+<li>栈：进程、线程、goroutine 都有自己的调用栈，先进后出（FILO）</li>
+<li>栈帧：可以理解是函数调用时，在栈上为函数所分配的内存区域</li>
+<li>调用者：caller，比如：A 函数调用了 B 函数，那么 A 就是调用者</li>
+<li>被调者：callee，比如：A 函数调用了 B 函数，那么 B 就是被调者</li>
+</ul>
+<h3 id="go-调用约定">GO 调用约定</h3>
+<ul>
+<li>由调用者（caller）负责函数参数的准备工作</li>
+<li>call指令负责保存PC地址</li>
+<li>被调用者（callee）负责BP的保存，SP扩栈，当完成函数操作后，需要恢复BP，SP</li>
+<li>被调用函数，需要声明自己所需栈空间大小和参数大小</li>
+</ul>
+<h3 id="go-routine栈帧布局">GO routine栈帧布局</h3>
+<p>Go 汇编使用的是<code>caller-save</code>模式，被调用函数的入参参数、返回值都由调用者维护、准备。因此，当需要调用一个函数时，需要先将这些工作准备好，才调用下一个函数，另外这些都需要进行内存对齐，对齐的大小是 sizeof(uintptr)。</p>
+<p><img src="/images/goroutine%E6%A0%88%E5%B8%A7%E7%BB%93%E6%9E%84.png" alt=""></p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-shell" data-lang="shell">                                                                             
+                       -----------------                                           
+                       current func arg0                                           
+                       ----------------- &lt;----------- FP<span class="o">(</span>pseudo FP<span class="o">)</span>                
+                        <span class="nb">caller</span> ret addr                                            
+                       +---------------+                                           
+                       <span class="p">|</span> <span class="nb">caller</span> BP<span class="o">(</span>*<span class="o">)</span>  <span class="p">|</span>                                           
+                       ----------------- &lt;----------- SP<span class="o">(</span>pseudo SP，实际上是当前栈帧的 BP 位置<span class="o">)</span>
+                       <span class="p">|</span>   Local Var0  <span class="p">|</span>                                           
+                       -----------------                                           
+                       <span class="p">|</span>   Local Var1  <span class="p">|</span>                                           
+                       -----------------                                           
+                       <span class="p">|</span>   Local Var2  <span class="p">|</span>                                           
+                       -----------------                -                          
+                       <span class="p">|</span>   ........    <span class="p">|</span>                                           
+                       -----------------                                           
+                       <span class="p">|</span>   Local VarN  <span class="p">|</span>                                           
+                       -----------------                                           
+                       <span class="p">|</span>               <span class="p">|</span>                                           
+                       <span class="p">|</span>               <span class="p">|</span>                                           
+                       <span class="p">|</span>  temporarily  <span class="p">|</span>                                           
+                       <span class="p">|</span>  unused space <span class="p">|</span>                                           
+                       <span class="p">|</span>               <span class="p">|</span>                                           
+                       <span class="p">|</span>               <span class="p">|</span>                                           
+                       -----------------                                           
+                       <span class="p">|</span>  call retn    <span class="p">|</span>                                           
+                       -----------------                                           
+                       <span class="p">|</span>  call ret<span class="o">(</span>n-1<span class="o">)</span><span class="p">|</span>                                           
+                       -----------------                                           
+                       <span class="p">|</span>  ..........   <span class="p">|</span>                                           
+                       -----------------                                           
+                       <span class="p">|</span>  call ret1    <span class="p">|</span>                                           
+                       -----------------                                           
+                       <span class="p">|</span>  call argn    <span class="p">|</span>                                           
+                       -----------------                                           
+                       <span class="p">|</span>   .....       <span class="p">|</span>                                           
+                       -----------------                                           
+                       <span class="p">|</span>  call arg3    <span class="p">|</span>                                           
+                       -----------------                                           
+                       <span class="p">|</span>  call arg2    <span class="p">|</span>                                           
+                       <span class="p">|</span>---------------<span class="p">|</span>                                           
+                       <span class="p">|</span>  call arg1    <span class="p">|</span>                                           
+                       -----------------   &lt;------------  hardware SP 位置           
+                         <span class="k">return</span> addr                                               
+                       +---------------+                                           
+                                                                                  
+</code></pre></td></tr></table>
+</div>
+</div><p><img src="/images/goroutine%E6%A0%88%E5%B8%A7%E5%B8%83%E5%B1%80.png" alt=""></p>
+<h3 id="常见指令">常见指令</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">助记符</th>
+<th style="text-align:left">指令种类</th>
+<th style="text-align:left">用途</th>
+<th style="text-align:left">示例</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left"><code>MOVQ</code></td>
+<td style="text-align:left">传送</td>
+<td style="text-align:left">数据传送</td>
+<td style="text-align:left">MOVQ 48, AX // 把 48 传送到 AX</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>LEAQ</code></td>
+<td style="text-align:left">传送</td>
+<td style="text-align:left">地址传送</td>
+<td style="text-align:left">LEAQ AX, BX // 把 AX 有效地址传送到 BX</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>PUSHQ</code></td>
+<td style="text-align:left">传送</td>
+<td style="text-align:left">栈压入</td>
+<td style="text-align:left">PUSHQ AX // 将 AX 内容送入栈顶位置</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>POPQ</code></td>
+<td style="text-align:left">传送</td>
+<td style="text-align:left">栈弹出</td>
+<td style="text-align:left">POPQ AX // 弹出栈顶数据后修改栈顶指针</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>ADDQ</code></td>
+<td style="text-align:left">运算</td>
+<td style="text-align:left">相加并赋值</td>
+<td style="text-align:left">ADDQ BX, AX // 等价于 AX+=BX</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>SUBQ</code></td>
+<td style="text-align:left">运算</td>
+<td style="text-align:left">相减并赋值</td>
+<td style="text-align:left">SUBQ BX, AX // 等价于 AX-=BX</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>CMPQ</code></td>
+<td style="text-align:left">运算</td>
+<td style="text-align:left">比较大小</td>
+<td style="text-align:left">CMPQ SI CX // 比较 SI 和 CX 的大小</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>CALL</code></td>
+<td style="text-align:left">转移</td>
+<td style="text-align:left">调用函数</td>
+<td style="text-align:left">CALL runtime.println(SB) // 发起调用</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>JMP</code></td>
+<td style="text-align:left">转移</td>
+<td style="text-align:left">无条件转移指令</td>
+<td style="text-align:left">JMP 0x0185 //无条件转至 0x0185 地址处</td>
+</tr>
+<tr>
+<td style="text-align:left"><code>JLS</code></td>
+<td style="text-align:left">转移</td>
+<td style="text-align:left">条件转移指令</td>
+<td style="text-align:left">JLS 0x0185 //左边小于右边，则跳到 0x0185</td>
+</tr>
+</tbody>
+</table>
+<p>指令的后缀来对应不同长度的操作数。B(8位)，W(16位)，D(32位)，Q(64位)。</p>
+<h3 id="函数声明">函数声明</h3>
+<p><img src="/images/go%E6%B1%87%E7%BC%96%E5%87%BD%E6%95%B0%E5%91%BD%E5%90%8D.png" alt="go汇编函数命名"></p>
+<p>TEXT 指代码段，是存储在 .text 段中的，除了 TEXT 之外还有 DATA/GLOBL。中点 <code>·</code> 比较特殊，是一个 unicode 的中点，该点在 mac 下的输入方法是 <code>option+shift+9</code>。在程序被链接之后，所有的中点<code>·</code> 都会被替换为句号<code>.</code>，比如你的方法是 <code>runtime·main</code>，在编译之后的程序里的符号则是 <code>runtime.main</code>。</p>
+<p>NOSPLIT: 向编译器表明，不应该插入 stack-split 的用来检查栈需要扩张的前导指令</p>
+<h2 id="talk-is-cheap-show-me-code">Talk is cheap, Show me code</h2>
+<p>输出汇编方法</p>
+<ul>
+<li>方法 1 先使用 <code>go build -gcflags &quot;-N -l&quot; main.go</code> 生成对应的可执行二进制文件 再使用 <code>go tool objdump -s &quot;main\.&quot; main</code> 反编译获取对应的汇编</li>
+<li>方法 2 使用 <code>go tool compile -S -N -l main.go</code> 这种方式直接输出汇编</li>
+<li>方法 3 使用<code>go build -gcflags=&quot;-N -l -S&quot; main.go</code> 直接输出汇编</li>
+</ul>
+<p>-l 禁止内联 -N 编译时，禁止优化 -S 输出汇编代码</p>
+<h3 id="实例">实例</h3>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">package</span> <span class="nx">main</span>
+
+<span class="kd">func</span> <span class="nf">addInt</span><span class="p">(</span><span class="nx">a</span><span class="p">,</span> <span class="nx">b</span> <span class="kt">int</span><span class="p">)</span> <span class="kt">int</span><span class="p">{</span>
+	<span class="nx">sum</span> <span class="o">:=</span> <span class="mi">0</span> <span class="c1">// 不设置该局部变量sum，add栈空间大小会是0
+</span><span class="c1"></span>	<span class="nx">sum</span> <span class="p">=</span> <span class="nx">a</span><span class="o">+</span><span class="nx">b</span>
+	<span class="k">return</span> <span class="nx">sum</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+	<span class="nb">println</span><span class="p">(</span><span class="nf">addInt</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-shell" data-lang="shell">go build -gcflags<span class="o">=</span><span class="s2">&#34;-N -l -S&#34;</span> main.go
+</code></pre></td></tr></table>
+</div>
+</div><p>-l 禁止内联 -N 编译时，禁止优化 -S 输出汇编代码</p>
+<p>截取主要输出</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span><span class="lnt">48
+</span><span class="lnt">49
+</span><span class="lnt">50
+</span><span class="lnt">51
+</span><span class="lnt">52
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-shell" data-lang="shell"><span class="c1"># command-line-arguments</span>
+<span class="s2">&#34;&#34;</span>.addInt STEXT nosplit <span class="nv">size</span><span class="o">=</span><span class="m">60</span> <span class="nv">args</span><span class="o">=</span>0x18 <span class="nv">locals</span><span class="o">=</span>0x10
+        0x0000 <span class="m">00000</span> <span class="o">(</span>main.go:3<span class="o">)</span>   TEXT    <span class="s2">&#34;&#34;</span>.addInt<span class="o">(</span>SB<span class="o">)</span>, NOSPLIT<span class="p">|</span>ABIInternal, <span class="nv">$16</span>-24 <span class="p">;;;</span> addInt函数定义，函数栈帧16字节，输入参数24字节（3个int参数），此函数有NOSPLIT，因此没有栈分裂的检查指令
+        0x0000 <span class="m">00000</span> <span class="o">(</span>main.go:3<span class="o">)</span>   SUBQ    <span class="nv">$16</span>, SP <span class="p">;;;</span> 当前SP向下扩栈16字节
+        0x0004 <span class="m">00004</span> <span class="o">(</span>main.go:3<span class="o">)</span>   MOVQ    BP, 8<span class="o">(</span>SP<span class="o">)</span> <span class="p">;;;</span> 将当前BP（即main函数的BP）保存在SP+8处
+        0x0009 <span class="m">00009</span> <span class="o">(</span>main.go:3<span class="o">)</span>   LEAQ    8<span class="o">(</span>SP<span class="o">)</span>, BP <span class="p">;;;</span> 将SP+8的地址值保存在BP寄存器中
+        0x000e <span class="m">00014</span> <span class="o">(</span>main.go:3<span class="o">)</span>   FUNCDATA        <span class="nv">$0</span>, gclocals·33cdeccccebe80329f1fdbee7f5874cb<span class="o">(</span>SB<span class="o">)</span>
+        0x000e <span class="m">00014</span> <span class="o">(</span>main.go:3<span class="o">)</span>   FUNCDATA        <span class="nv">$1</span>, gclocals·33cdeccccebe80329f1fdbee7f5874cb<span class="o">(</span>SB<span class="o">)</span>
+        0x000e <span class="m">00014</span> <span class="o">(</span>main.go:3<span class="o">)</span>   MOVQ    <span class="nv">$0</span>, <span class="s2">&#34;&#34;</span>.~r2+40<span class="o">(</span>SP<span class="o">)</span> <span class="p">;;;</span> 初始化结果值为0
+        0x0017 <span class="m">00023</span> <span class="o">(</span>main.go:4<span class="o">)</span>   MOVQ    <span class="nv">$0</span>, <span class="s2">&#34;&#34;</span>.sum<span class="o">(</span>SP<span class="o">)</span> <span class="p">;;;</span> 初始化sum变量为0
+        0x001f <span class="m">00031</span> <span class="o">(</span>main.go:5<span class="o">)</span>   MOVQ    <span class="s2">&#34;&#34;</span>.a+24<span class="o">(</span>SP<span class="o">)</span>, AX <span class="p">;;;</span> <span class="nv">AX</span> <span class="o">=</span> AX + 24<span class="o">(</span>SP<span class="o">)</span>
+        0x0024 <span class="m">00036</span> <span class="o">(</span>main.go:5<span class="o">)</span>   ADDQ    <span class="s2">&#34;&#34;</span>.b+32<span class="o">(</span>SP<span class="o">)</span>, AX <span class="p">;;;</span> <span class="nv">AX</span> <span class="o">=</span> AX + 32<span class="o">(</span>SP<span class="o">)</span>
+        0x0029 <span class="m">00041</span> <span class="o">(</span>main.go:5<span class="o">)</span>   MOVQ    AX, <span class="s2">&#34;&#34;</span>.sum<span class="o">(</span>SP<span class="o">)</span>  <span class="p">;;;</span> <span class="nv">SUM</span> <span class="o">=</span> AX
+        0x002d <span class="m">00045</span> <span class="o">(</span>main.go:6<span class="o">)</span>   MOVQ    AX, <span class="s2">&#34;&#34;</span>.~r2+40<span class="o">(</span>SP<span class="o">)</span> <span class="p">;;;</span> 40<span class="o">(</span>SP<span class="o">)</span> <span class="o">=</span> AX
+        0x0032 <span class="m">00050</span> <span class="o">(</span>main.go:6<span class="o">)</span>   MOVQ    8<span class="o">(</span>SP<span class="o">)</span>, BP <span class="p">;;;</span> 处理收尾工作，将main函数的BP取出到BP寄存器
+        0x0037 <span class="m">00055</span> <span class="o">(</span>main.go:6<span class="o">)</span>   ADDQ    <span class="nv">$16</span>, SP <span class="p">;;;</span> <span class="nv">SP</span><span class="o">=</span>SP+16,释放函数栈空间
+        0x003b <span class="m">00059</span> <span class="o">(</span>main.go:6<span class="o">)</span>   RET  <span class="p">;;;</span> 返回函数调用
+    ...... 省略
+<span class="s2">&#34;&#34;</span>.main STEXT <span class="nv">size</span><span class="o">=</span><span class="m">110</span> <span class="nv">args</span><span class="o">=</span>0x0 <span class="nv">locals</span><span class="o">=</span>0x28
+        0x0000 <span class="m">00000</span> <span class="o">(</span>main.go:9<span class="o">)</span>   TEXT    <span class="s2">&#34;&#34;</span>.main<span class="o">(</span>SB<span class="o">)</span>, ABIInternal, <span class="nv">$40</span>-0 <span class="p">;;;</span> main函数定义入口，栈帧大小为40个字节，参数大小为0个字节
+        0x0000 <span class="m">00000</span> <span class="o">(</span>main.go:9<span class="o">)</span>   MOVQ    <span class="o">(</span>TLS<span class="o">)</span>, CX <span class="p">;;;</span> 这些是检查栈分裂的代码，由编译器编译时插入，预防栈溢出
+        0x0009 <span class="m">00009</span> <span class="o">(</span>main.go:9<span class="o">)</span>   CMPQ    SP, 16<span class="o">(</span>CX<span class="o">)</span>
+        0x000d <span class="m">00013</span> <span class="o">(</span>main.go:9<span class="o">)</span>   PCDATA  <span class="nv">$0</span>, <span class="nv">$-</span><span class="m">2</span>
+        0x000d <span class="m">00013</span> <span class="o">(</span>main.go:9<span class="o">)</span>   JLS     <span class="m">103</span>     <span class="p">;;;</span> 如果检测到栈空间不够，调到103行执行栈空间扩张
+        0x000f <span class="m">00015</span> <span class="o">(</span>main.go:9<span class="o">)</span>   PCDATA  <span class="nv">$0</span>, <span class="nv">$-</span><span class="m">1</span>
+        0x000f <span class="m">00015</span> <span class="o">(</span>main.go:9<span class="o">)</span>   SUBQ    <span class="nv">$40</span>, SP <span class="p">;;;</span> 将SP地址往下移动40个字节，SP<span class="o">=</span>SP-40，初始化main函数占空间
+        0x0013 <span class="m">00019</span> <span class="o">(</span>main.go:9<span class="o">)</span>   MOVQ    BP, 32<span class="o">(</span>SP<span class="o">)</span> <span class="p">;;;</span> 将当前BP的值保存在地址SP+32地址处
+        0x0018 <span class="m">00024</span> <span class="o">(</span>main.go:9<span class="o">)</span>   LEAQ    32<span class="o">(</span>SP<span class="o">)</span>, BP <span class="p">;;;</span> 将SP+32对应的内存地址保存在BP中，此时完成main函数的栈帧空间布局初始化
+        0x001d <span class="m">00029</span> <span class="o">(</span>main.go:9<span class="o">)</span>   FUNCDATA        <span class="nv">$0</span>, gclocals·33cdeccccebe80329f1fdbee7f5874cb<span class="o">(</span>SB<span class="o">)</span> <span class="p">;;;</span>垃圾收集器需要的信息。它们由编译器产生
+        0x001d <span class="m">00029</span> <span class="o">(</span>main.go:9<span class="o">)</span>   FUNCDATA        <span class="nv">$1</span>, gclocals·33cdeccccebe80329f1fdbee7f5874cb<span class="o">(</span>SB<span class="o">)</span> <span class="p">;;;</span>垃圾收集器需要的信息。它们由编译器产生
+        0x001d <span class="m">00029</span> <span class="o">(</span>main.go:10<span class="o">)</span>  MOVQ    <span class="nv">$1</span>, <span class="o">(</span>SP<span class="o">)</span> <span class="p">;;;</span> 将立即数1存入SP指向的内存地址处
+        0x0025 <span class="m">00037</span> <span class="o">(</span>main.go:10<span class="o">)</span>  MOVQ    <span class="nv">$2</span>, 8<span class="o">(</span>SP<span class="o">)</span> <span class="p">;;;</span> 将立即数2存入SP+8指向的内存地址处
+        0x002e <span class="m">00046</span> <span class="o">(</span>main.go:10<span class="o">)</span>  PCDATA  <span class="nv">$1</span>, <span class="nv">$0</span>
+        0x002e <span class="m">00046</span> <span class="o">(</span>main.go:10<span class="o">)</span>  CALL    <span class="s2">&#34;&#34;</span>.addInt<span class="o">(</span>SB<span class="o">)</span> <span class="p">;;;</span> 调用addInt，call指令将下一条指令压栈
+        0x0033 <span class="m">00051</span> <span class="o">(</span>main.go:10<span class="o">)</span>  MOVQ    16<span class="o">(</span>SP<span class="o">)</span>, AX <span class="p">;;;</span>将函数返回值move到AX寄存器
+        0x0038 <span class="m">00056</span> <span class="o">(</span>main.go:10<span class="o">)</span>  MOVQ    AX, <span class="s2">&#34;&#34;</span>..autotmp_0+24<span class="o">(</span>SP<span class="o">)</span> <span class="p">;;;</span> 将AX move到SP+24
+        0x003d <span class="m">00061</span> <span class="o">(</span>main.go:10<span class="o">)</span>  NOP
+        0x0040 <span class="m">00064</span> <span class="o">(</span>main.go:10<span class="o">)</span>  CALL    runtime.printlock<span class="o">(</span>SB<span class="o">)</span> <span class="p">;;;</span>执行printlock调用
+        0x0045 <span class="m">00069</span> <span class="o">(</span>main.go:10<span class="o">)</span>  MOVQ    <span class="s2">&#34;&#34;</span>..autotmp_0+24<span class="o">(</span>SP<span class="o">)</span>, AX
+        0x004a <span class="m">00074</span> <span class="o">(</span>main.go:10<span class="o">)</span>  MOVQ    AX, <span class="o">(</span>SP<span class="o">)</span>
+        0x004e <span class="m">00078</span> <span class="o">(</span>main.go:10<span class="o">)</span>  CALL    runtime.printint<span class="o">(</span>SB<span class="o">)</span>
+        0x0053 <span class="m">00083</span> <span class="o">(</span>main.go:10<span class="o">)</span>  CALL    runtime.printnl<span class="o">(</span>SB<span class="o">)</span>
+        0x0058 <span class="m">00088</span> <span class="o">(</span>main.go:10<span class="o">)</span>  CALL    runtime.printunlock<span class="o">(</span>SB<span class="o">)</span>
+        0x005d <span class="m">00093</span> <span class="o">(</span>main.go:11<span class="o">)</span>  MOVQ    32<span class="o">(</span>SP<span class="o">)</span>, BP
+        0x0062 <span class="m">00098</span> <span class="o">(</span>main.go:11<span class="o">)</span>  ADDQ    <span class="nv">$40</span>, SP
+        0x0066 <span class="m">00102</span> <span class="o">(</span>main.go:11<span class="o">)</span>  RET
+        0x0067 <span class="m">00103</span> <span class="o">(</span>main.go:11<span class="o">)</span>  NOP
+        0x0067 <span class="m">00103</span> <span class="o">(</span>main.go:9<span class="o">)</span>   PCDATA  <span class="nv">$1</span>, <span class="nv">$-</span><span class="m">1</span>
+        0x0067 <span class="m">00103</span> <span class="o">(</span>main.go:9<span class="o">)</span>   PCDATA  <span class="nv">$0</span>, <span class="nv">$-</span><span class="m">2</span>
+        0x0067 <span class="m">00103</span> <span class="o">(</span>main.go:9<span class="o">)</span>   CALL    runtime.morestack_noctxt<span class="o">(</span>SB<span class="o">)</span> <span class="p">;;;</span> 栈分裂过程
+        0x006c <span class="m">00108</span> <span class="o">(</span>main.go:9<span class="o">)</span>   PCDATA  <span class="nv">$0</span>, <span class="nv">$-</span><span class="m">1</span>
+        0x006c <span class="m">00108</span> <span class="o">(</span>main.go:9<span class="o">)</span>   JMP     <span class="m">0</span>
+</code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>指令15-24所做的事情: 进入main函数，完成main函数栈空间初始化，主要是依据函数的栈空间大小进行向下扩栈操作，保存caller的BP数据
+<img src="/images/main%E5%87%BD%E6%95%B0%E6%A0%88%E5%B8%A7%E5%88%9D%E5%A7%8B%E5%8C%96.png" alt=""></li>
+</ul>
+<p>这里多说一句，这个<code>main父函数</code> 对应的源码在runtime/proc.go:114。GO 程序真正的入口是在runtime/asm_arm64.s:11 （以Mac 系统为例），这里简单摘录几种一部分代码</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-asm" data-lang="asm"><span class="nf">TEXT</span> <span class="no">runtime</span><span class="err">·</span><span class="no">rt0_go</span><span class="p">(</span><span class="no">SB</span><span class="p">),</span><span class="no">NOSPLIT</span><span class="p">,</span><span class="no">$0</span>
+	<span class="err">//</span> <span class="nf">SP</span> <span class="err">=</span> <span class="no">stack</span><span class="c">; R0 = argc; R1 = argv
+</span><span class="c"></span>
+	<span class="nf">SUB</span>	<span class="no">$32</span><span class="p">,</span> <span class="no">RSP</span>
+	<span class="nf">MOVW</span>	<span class="no">R0</span><span class="p">,</span> <span class="mi">8</span><span class="p">(</span><span class="no">RSP</span><span class="p">)</span> <span class="err">//</span> <span class="no">argc</span>
+	<span class="nf">MOVD</span>	<span class="no">R1</span><span class="p">,</span> <span class="mi">16</span><span class="p">(</span><span class="no">RSP</span><span class="p">)</span> <span class="err">//</span> <span class="no">argv</span>
+<span class="na">...</span>
+  <span class="nf">MOVW</span>	<span class="mi">8</span><span class="p">(</span><span class="no">RSP</span><span class="p">),</span> <span class="no">R0</span>	<span class="err">//</span> <span class="no">copy</span> <span class="no">argc</span>
+	<span class="nf">MOVW</span>	<span class="no">R0</span><span class="p">,</span> <span class="p">-</span><span class="mi">8</span><span class="p">(</span><span class="no">RSP</span><span class="p">)</span>
+	<span class="nf">MOVD</span>	<span class="mi">16</span><span class="p">(</span><span class="no">RSP</span><span class="p">),</span> <span class="no">R0</span>		<span class="err">//</span> <span class="no">copy</span> <span class="no">argv</span>
+	<span class="nf">MOVD</span>	<span class="no">R0</span><span class="p">,</span> <span class="mi">0</span><span class="p">(</span><span class="no">RSP</span><span class="p">)</span>
+	<span class="nf">BL</span>	<span class="no">runtime</span><span class="err">·</span><span class="no">args</span><span class="p">(</span><span class="no">SB</span><span class="p">)</span>
+	<span class="nf">BL</span>	<span class="no">runtime</span><span class="err">·</span><span class="no">osinit</span><span class="p">(</span><span class="no">SB</span><span class="p">)</span>
+	<span class="nf">BL</span>	<span class="no">runtime</span><span class="err">·</span><span class="no">schedinit</span><span class="p">(</span><span class="no">SB</span><span class="p">)</span> <span class="c">;;; 此处又会执行go函数的初始化
+</span><span class="c"></span>
+	<span class="err">//</span> <span class="nf">create</span> <span class="no">a</span> <span class="no">new</span> <span class="no">goroutine</span> <span class="no">to</span> <span class="no">start</span> <span class="no">program</span>
+	<span class="nf">MOVD</span>	<span class="no">$runtime</span><span class="err">·</span><span class="no">mainPC</span><span class="p">(</span><span class="no">SB</span><span class="p">),</span> <span class="no">R0</span>		<span class="err">//</span> <span class="no">entry</span>
+	<span class="nf">MOVD</span>	<span class="no">RSP</span><span class="p">,</span> <span class="no">R7</span>
+	<span class="nf">MOVD.W</span>	<span class="no">$0</span><span class="p">,</span> <span class="p">-</span><span class="mi">8</span><span class="p">(</span><span class="no">R7</span><span class="p">)</span>
+	<span class="nf">MOVD.W</span>	<span class="no">R0</span><span class="p">,</span> <span class="p">-</span><span class="mi">8</span><span class="p">(</span><span class="no">R7</span><span class="p">)</span>
+	<span class="nf">MOVD.W</span>	<span class="no">$0</span><span class="p">,</span> <span class="p">-</span><span class="mi">8</span><span class="p">(</span><span class="no">R7</span><span class="p">)</span>
+	<span class="nf">MOVD.W</span>	<span class="no">$0</span><span class="p">,</span> <span class="p">-</span><span class="mi">8</span><span class="p">(</span><span class="no">R7</span><span class="p">)</span>
+	<span class="nf">MOVD</span>	<span class="no">R7</span><span class="p">,</span> <span class="no">RSP</span>
+	<span class="nf">BL</span>	<span class="no">runtime</span><span class="err">·</span><span class="no">newproc</span><span class="p">(</span><span class="no">SB</span><span class="p">)</span>
+	<span class="nf">ADD</span>	<span class="no">$32</span><span class="p">,</span> <span class="no">RSP</span>
+
+	<span class="err">//</span> <span class="nf">start</span> <span class="no">this</span> <span class="no">M</span>
+	<span class="nf">BL</span>	<span class="no">runtime</span><span class="err">·</span><span class="no">mstart</span><span class="p">(</span><span class="no">SB</span><span class="p">)</span>
+<span class="na">...</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>runtime·schedinit 的实现</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">schedinit</span><span class="p">()</span> <span class="p">{</span>
+  <span class="o">...</span>
+  <span class="nf">tracebackinit</span><span class="p">()</span>
+	<span class="nf">moduledataverify</span><span class="p">()</span>
+	<span class="nf">stackinit</span><span class="p">()</span>  <span class="c1">// goroutine栈空间初始化
+</span><span class="c1"></span>	<span class="nf">mallocinit</span><span class="p">()</span>  <span class="c1">// mspan, mcache, mcentral, mheap等数据结构初始化的地方
+</span><span class="c1"></span>	<span class="nf">fastrandinit</span><span class="p">()</span> <span class="c1">// must run before mcommoninit
+</span><span class="c1"></span>	<span class="nf">mcommoninit</span><span class="p">(</span><span class="nx">_g_</span><span class="p">.</span><span class="nx">m</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+	<span class="nf">cpuinit</span><span class="p">()</span>       <span class="c1">// must run before alginit
+</span><span class="c1"></span>	<span class="nf">alginit</span><span class="p">()</span>       <span class="c1">// maps must not be used before this call
+</span><span class="c1"></span>	<span class="nf">modulesinit</span><span class="p">()</span>   <span class="c1">// provides activeModules
+</span><span class="c1"></span>	<span class="nf">typelinksinit</span><span class="p">()</span> <span class="c1">// uses maps, activeModules
+</span><span class="c1"></span>	<span class="nf">itabsinit</span><span class="p">()</span>     <span class="c1">// uses activeModules
+</span><span class="c1"></span>
+	<span class="nf">msigsave</span><span class="p">(</span><span class="nx">_g_</span><span class="p">.</span><span class="nx">m</span><span class="p">)</span>
+	<span class="nx">initSigmask</span> <span class="p">=</span> <span class="nx">_g_</span><span class="p">.</span><span class="nx">m</span><span class="p">.</span><span class="nx">sigmask</span>
+
+	<span class="nf">goargs</span><span class="p">()</span>
+	<span class="nf">goenvs</span><span class="p">()</span>
+	<span class="nf">parsedebugvars</span><span class="p">()</span>
+	<span class="nf">gcinit</span><span class="p">()</span> <span class="c1">// gc初始化
+</span><span class="c1"></span>
+	<span class="nx">sched</span><span class="p">.</span><span class="nx">lastpoll</span> <span class="p">=</span> <span class="nb">uint64</span><span class="p">(</span><span class="nf">nanotime</span><span class="p">())</span>
+	<span class="nx">procs</span> <span class="o">:=</span> <span class="nx">ncpu</span>
+	<span class="k">if</span> <span class="nx">n</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nf">atoi32</span><span class="p">(</span><span class="nf">gogetenv</span><span class="p">(</span><span class="s">&#34;GOMAXPROCS&#34;</span><span class="p">));</span> <span class="nx">ok</span> <span class="o">&amp;&amp;</span> <span class="nx">n</span> <span class="p">&gt;</span> <span class="mi">0</span> <span class="p">{</span>
+		<span class="nx">procs</span> <span class="p">=</span> <span class="nx">n</span>
+	<span class="p">}</span>
+	<span class="k">if</span> <span class="nf">procresize</span><span class="p">(</span><span class="nx">procs</span><span class="p">)</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
+		<span class="nf">throw</span><span class="p">(</span><span class="s">&#34;unknown runnable goroutine during bootstrap&#34;</span><span class="p">)</span>
+	<span class="p">}</span>
+  <span class="o">...</span>
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>指令29-46：main函数负责将参数准备好</li>
+</ul>
+<p><img src="/images/%E5%87%BD%E6%95%B0%E8%B0%83%E7%94%A8--%E5%8F%82%E6%95%B0%E5%8E%8B%E6%A0%88.png" alt=""></p>
+<ul>
+<li>call指令调用&amp;&amp;addInt函数中0到45行指令</li>
+</ul>
+<p><img src="/images/addInt%E8%BF%87%E7%A8%8B.png" alt=""></p>
+<ul>
+<li>addInt函数中的50-59指令：</li>
+</ul>
+<p><img src="/images/addIntret%E8%BF%87%E7%A8%8B.png" alt=""></p>
+<h2 id="手动写汇编">手动写汇编</h2>
+<p>大致了解了GO汇编的一些语法，我们自己来动手写一个汇编程序
+在项目中，随意新建一个文件，后缀以.s结尾，定义一个函数addInt</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-asm" data-lang="asm"><span class="c">#include &#34;textflag.h&#34;
+</span><span class="c"></span>
+<span class="nf">TEXT</span> <span class="err">·</span><span class="no">addInt</span><span class="p">(</span><span class="no">SB</span><span class="p">),</span><span class="no">NOSPLIT</span><span class="p">,</span><span class="no">$0-24</span>
+    <span class="nf">MOVQ</span> <span class="no">$0</span><span class="p">,</span> <span class="no">AX</span><span class="c">;
+</span><span class="c"></span>    <span class="no">ADDQ</span> <span class="no">a</span><span class="err">+</span><span class="mi">0</span><span class="p">(</span><span class="no">FP</span><span class="p">),</span> <span class="no">AX</span><span class="c">;
+</span><span class="c"></span>    <span class="no">ADDQ</span> <span class="no">b</span><span class="err">+</span><span class="mi">8</span><span class="p">(</span><span class="no">FP</span><span class="p">),</span> <span class="no">AX</span><span class="c">;
+</span><span class="c"></span>    <span class="no">MOVQ</span> <span class="no">AX</span><span class="p">,</span> <span class="no">i</span><span class="err">+</span><span class="mi">16</span><span class="p">(</span><span class="no">FP</span><span class="p">)</span><span class="c">;
+</span><span class="c"></span>    <span class="no">RET</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>在main函数中调用该函数</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">package</span> <span class="nx">main</span>
+
+<span class="c1">//此处仅申明函数，函数实现在.s文件中，go编译器会自动查找相同目录下.s文件
+</span><span class="c1"></span><span class="kd">func</span> <span class="nf">addInt</span><span class="p">(</span><span class="nx">a</span><span class="p">,</span> <span class="nx">b</span> <span class="kt">int</span><span class="p">)</span> <span class="kt">int</span>
+
+<span class="kd">func</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+	<span class="nb">println</span><span class="p">(</span><span class="nf">addInt</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>执行正常编译，可以看到我们自己动手写汇编有很大不用，首先不使用SP寄存器，而是使用FP寄存器，FP寄存器指向的参数起始地址处，参考上面的布局图。</p>
+<p>执行反编译</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-shell" data-lang="shell">go tool objdump -s <span class="s2">&#34;main\.&#34;</span> main
+</code></pre></td></tr></table>
+</div>
+</div><p><code>-s &quot;main\.&quot;</code>表示只输出与<code>main</code>有关的汇编，不然输出会淹没有效信息，截取输出如下</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-shell" data-lang="shell">TEXT main.addInt<span class="o">(</span>SB<span class="o">)</span> main.go
+  main.go:3             0x105c8a0               4883ec10                SUBQ <span class="nv">$0</span>x10, SP   <span class="p">;;;</span> 扩栈  
+  main.go:3             0x105c8a4               48896c2408              MOVQ BP, 0x8<span class="o">(</span>SP<span class="o">)</span> <span class="p">;;;</span> 保存父函数BP  
+  main.go:3             0x105c8a9               488d6c2408              LEAQ 0x8<span class="o">(</span>SP<span class="o">)</span>, BP <span class="p">;;;</span> 设置当前函数BP  
+  main.go:3             0x105c8ae               48c744242800000000      MOVQ <span class="nv">$0</span>x0, 0x28<span class="o">(</span>SP<span class="o">)</span>     
+  main.go:4             0x105c8b7               48c7042400000000        MOVQ <span class="nv">$0</span>x0, 0<span class="o">(</span>SP<span class="o">)</span>        
+  main.go:5             0x105c8bf               488b442418              MOVQ 0x18<span class="o">(</span>SP<span class="o">)</span>, AX       
+  main.go:5             0x105c8c4               <span class="m">4803442420</span>              ADDQ 0x20<span class="o">(</span>SP<span class="o">)</span>, AX       
+  main.go:5             0x105c8c9               <span class="m">48890424</span>                MOVQ AX, 0<span class="o">(</span>SP<span class="o">)</span>          
+  main.go:6             0x105c8cd               <span class="m">4889442428</span>              MOVQ AX, 0x28<span class="o">(</span>SP<span class="o">)</span>       
+  main.go:6             0x105c8d2               488b6c2408              MOVQ 0x8<span class="o">(</span>SP<span class="o">)</span>, BP        
+  main.go:6             0x105c8d7               4883c410                ADDQ <span class="nv">$0</span>x10, SP          
+  main.go:6             0x105c8db               c3                      RET                     
+  :-1                   0x105c8dc               cc                      INT <span class="nv">$0</span>x3                
+  :-1                   0x105c8dd               cc                      INT <span class="nv">$0</span>x3                
+  :-1                   0x105c8de               cc                      INT <span class="nv">$0</span>x3                
+  :-1                   0x105c8df               cc                      INT <span class="nv">$0</span>x3                
+
+TEXT main.main<span class="o">(</span>SB<span class="o">)</span> main.go
+  main.go:9             0x105c8e0               65488b0c2530000000      MOVQ GS:0x30, CX                        
+  main.go:9             0x105c8e9               483b6110                CMPQ 0x10<span class="o">(</span>CX<span class="o">)</span>, SP                       
+  main.go:9             0x105c8ed               <span class="m">7658</span>                    JBE 0x105c947                           
+  main.go:9             0x105c8ef               4883ec28                SUBQ <span class="nv">$0</span>x28, SP  <span class="p">;;;</span>main函数扩栈                        
+  main.go:9             0x105c8f3               48896c2420              MOVQ BP, 0x20<span class="o">(</span>SP<span class="o">)</span> <span class="p">;;;</span>保存父函数BP                      
+  main.go:9             0x105c8f8               488d6c2420              LEAQ 0x20<span class="o">(</span>SP<span class="o">)</span>, BP <span class="p">;;;</span>设置当前函数BP                     
+  main.go:10            0x105c8fd               48c7042401000000        MOVQ <span class="nv">$0</span>x1, 0<span class="o">(</span>SP<span class="o">)</span>                        
+  main.go:10            0x105c905               48c744240802000000      MOVQ <span class="nv">$0</span>x2, 0x8<span class="o">(</span>SP<span class="o">)</span>                      
+  main.go:10            0x105c90e               e88dffffff              CALL main.addInt<span class="o">(</span>SB<span class="o">)</span> <span class="p">;;;</span>发起函数调用                   
+  main.go:10            0x105c913               488b442410              MOVQ 0x10<span class="o">(</span>SP<span class="o">)</span>, AX                       
+  main.go:10            0x105c918               <span class="m">4889442418</span>              MOVQ AX, 0x18<span class="o">(</span>SP<span class="o">)</span>                       
+  main.go:10            0x105c91d               0f1f00                  NOPL 0<span class="o">(</span>AX<span class="o">)</span>                              
+  main.go:10            0x105c920               e85b15fdff              CALL runtime.printlock<span class="o">(</span>SB<span class="o">)</span>              
+  main.go:10            0x105c925               488b442418              MOVQ 0x18<span class="o">(</span>SP<span class="o">)</span>, AX                       
+  main.go:10            0x105c92a               <span class="m">48890424</span>                MOVQ AX, 0<span class="o">(</span>SP<span class="o">)</span>                          
+  main.go:10            0x105c92e               e86d1dfdff              CALL runtime.printint<span class="o">(</span>SB<span class="o">)</span>               
+  main.go:10            0x105c933               e80818fdff              CALL runtime.printnl<span class="o">(</span>SB<span class="o">)</span>                
+  main.go:10            0x105c938               e8c315fdff              CALL runtime.printunlock<span class="o">(</span>SB<span class="o">)</span>            
+  main.go:11            0x105c93d               488b6c2420              MOVQ 0x20<span class="o">(</span>SP<span class="o">)</span>, BP                       
+  main.go:11            0x105c942               4883c428                ADDQ <span class="nv">$0</span>x28, SP                          
+  main.go:11            0x105c946               c3                      RET                                     
+  main.go:9             0x105c947               e8f4b1ffff              CALL runtime.morestack_noctxt<span class="o">(</span>SB<span class="o">)</span>       
+  main.go:9             0x105c94c               eb92                    JMP main.main<span class="o">(</span>SB<span class="o">)</span> 
+</code></pre></td></tr></table>
+</div>
+</div><p>可以得知：</p>
+<ul>
+<li>(FP)伪寄存器，只有在编写 Go 汇编代码时使用。FP 伪寄存器指向 caller 传递给 callee 的第一个参数</li>
+<li>使用 go tool compile / go tool objdump 得到的汇编中看不到(FP)寄存器的踪影</li>
+</ul>
+<h2 id="回过头来看那几个重要寄存器">回过头来看那几个重要寄存器</h2>
+<ul>
+<li>FP: 使用如 <code>symbol+offset(FP)</code>的方式，引用 callee 函数的入参参数。例如 <code>arg0+0(FP)，arg1+8(FP)</code>，使用 FP 必须加 symbol ，否则无法通过编译(从汇编层面来看，symbol 没有什么用，加 symbol 主要是为了提升代码可读性)。另外，需要注意的是：往往在编写 go 汇编代码时，要站在 callee 的角度来看(FP)，在 callee 看来，(FP)指向的是 caller 调用 callee 时传递的第一个参数的位置。假如当前的 callee 函数是 add，在 add 的代码中引用 FP，该 FP 指向的位置不在 callee 的 stack frame 之内。而是在 caller 的 stack frame 上，指向调用 add 函数时传递的第一个参数的位置，经常在 callee 中用<code>symbol+offset(FP)</code>来获取入参的参数值。</li>
+<li>SB: 全局静态基指针，一般用在声明函数、全局变量中。</li>
+<li>SP: 该寄存器也是最具有迷惑性的寄存器，因为会有伪 SP 寄存器和硬件 SP 寄存器之分。plan9 的这个伪 SP 寄存器指向当前栈帧第一个局部变量的结束位置(为什么说是结束位置，可以看下面寄存器内存布局图)，使用形如 symbol+offset(SP) 的方式，引用函数的局部变量。offset 的合法取值是 [-framesize, 0)，注意是个左闭右开的区间。假如局部变量都是 8 字节，那么第一个局部变量就可以用 localvar0-8(SP) 来表示。与硬件寄存器 SP 是两个不同的东西，在栈帧 size 为 0 的情况下，伪寄存器 SP 和硬件寄存器 SP 指向同一位置。手写汇编代码时，如果是 symbol+offset(SP)形式，则表示伪寄存器 SP。如果是 offset(SP)则表示硬件寄存器 SP。<code>务必注意</code>：对于编译输出(go tool compile -S / go tool objdump)的代码来讲，所有的 SP 都是硬件 SP 寄存器，无论是否带 symbol（这一点非常具有迷惑性，需要慢慢理解。往往在分析编译输出的汇编时，看到的就是硬件 SP 寄存器）。</li>
+<li>PC: 实际上就是在体系结构的知识中常见的 pc 寄存器，在 x86 平台下对应 ip 寄存器，amd64 上则是 rip。除了个别跳转之外，手写 plan9 汇编代码时，很少用到 PC 寄存器</li>
+</ul>
+<h2 id="分享总结">分享总结</h2>
+<h3 id="想达到的目的">想达到的目的</h3>
+<ul>
+<li>对于GO ASM有初步的了解，如果能引起大家的兴趣，那就更好了</li>
+<li>能看懂源码中一些简单的汇编，帮助大家学习源码</li>
+<li>有兴趣的小伙伴，一起研究GO语言分享吧</li>
+</ul>
+<h3 id="适度">适度</h3>
+<ul>
+<li>GO ASM不宜深究，总体程度达到能看懂大概意思即可，很多东西花了太多时间搞清楚了，反而觉得没啥用</li>
+<li>总体达到能通过汇编分析一些特性底层实现能力即可</li>
+</ul>
+<h2 id="参考资料">参考资料</h2>
+<ul>
+<li><a href="https://golang.org/doc/asm">go官网文档asm</a></li>
+<li><a href="https://9p.io/sys/doc/asm.pdf">plan 9文档</a></li>
+<li><a href="https://www.bilibili.com/video/av46494102">春晖讲解go plan9</a></li>
+<li><a href="https://xargin.com/plan9-assembly/">春晖讲解文档地址</a></li>
+<li><a href="https://lrita.github.io/2017/12/12/golang-asm/#why">golang 汇编</a></li>
+<li><a href="https://github.com/cch123/golang-notes/blob/master/assembly.md#plan9-assembly-%E5%AE%8C%E5%85%A8%E8%A7%A3%E6%9E%90">plan9-assembly完全解析</a></li>
+</ul>
+    </div>
+
+    
+<footer class="post-footer">
+      <div class="post-tags">
+          <a href="/tags/go/">go</a>
+          <a href="/tags/asm/">asm</a>
+          </div>
+      <nav class="post-nav">
+        <a class="prev" href="/post/bolt_reading/">
+            <i class="iconfont icon-left"></i>
+            <span class="prev-text nav-default">Bolt源码分析（一）--数据结构解读</span>
+            <span class="prev-text nav-mobile">上一篇</span>
+          </a>
+        <a class="next" href="/post/go-benchmark/">
+            <span class="next-text nav-default">Go Benchmark理解</span>
+            <span class="next-text nav-mobile">下一篇</span>
+            <i class="iconfont icon-right"></i>
+          </a>
+      </nav>
+    </footer>
+  </article>
+        </div>
+        
+
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="social-links">
+      <a href="mailto:liracle1@126.com" class="iconfont icon-email" title="email"></a>
+      <a href="https://github.com/liracle/" class="iconfont icon-github" title="github"></a>
+  <a href="https://www.ipeapea.cn/index.xml" type="application/rss+xml" class="iconfont icon-rss" title="rss"></a>
+</div>
+
+<div class="copyright">
+  
+
+  <div class="busuanzi-footer">
+    <span id="busuanzi_container_site_pv"> 本站总访问量 <span id="busuanzi_value_site_pv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> 次 </span>
+      <span class="division">|</span>
+    <span id="busuanzi_container_site_uv"> 本站总访客数 <span id="busuanzi_value_site_uv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> 人 </span>
+  </div>
+
+  <span class="copyright-year">
+    &copy; 
+    2021<span class="heart"><i class="iconfont icon-heart"></i></span><span>CopyRight@2010-2030 ipeapea.cn 蜀ICP备2021020797号</span>
+  </span>
+</div>
+
+    </footer>
+
+    <div class="back-to-top" id="back-to-top">
+      <i class="iconfont icon-up"></i>
+    </div>
+  </div>
+  
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.2.1/dist/jquery.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/slideout@1.0.1/dist/slideout.min.js" integrity="sha256-t+zJ/g8/KXIJMjSVQdnibt4dlaDxc9zXr/9oNPeWqdg=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.js" integrity="sha256-XVLffZaxoWfGUEbdzuLi7pwaUJv1cecsQJQqGLe7axY=" crossorigin="anonymous"></script>
+
+
+
+<script type="text/javascript" src="/js/main.min.c99b103c33d1539acf3025e1913697534542c4a5aa5af0ccc20475ed2863603b.js"></script>
+
+
+
+
+
+
+
+
+</body>
+</html>

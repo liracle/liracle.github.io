@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Tags on 静心台--keep learning and keep moving</title>
+    <link>https://www.ipeapea.cn/tags/</link>
+    <description>Recent content in Tags on 静心台--keep learning and keep moving</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh-cn</language>
+    <copyright>CopyRight@2010-2030 ipeapea.cn 蜀ICP备2021020797号</copyright>
+    <lastBuildDate>Tue, 18 May 2021 03:24:29 +0800</lastBuildDate><atom:link href="https://www.ipeapea.cn/tags/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>k8s</title>
+      <link>https://www.ipeapea.cn/tags/k8s/</link>
+      <pubDate>Tue, 18 May 2021 03:24:29 +0800</pubDate>
+      
+      <guid>https://www.ipeapea.cn/tags/k8s/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>minikube</title>
+      <link>https://www.ipeapea.cn/tags/minikube/</link>
+      <pubDate>Tue, 18 May 2021 03:24:29 +0800</pubDate>
+      
+      <guid>https://www.ipeapea.cn/tags/minikube/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>go</title>
+      <link>https://www.ipeapea.cn/tags/go/</link>
+      <pubDate>Tue, 04 May 2021 15:27:58 +0800</pubDate>
+      
+      <guid>https://www.ipeapea.cn/tags/go/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>bolt</title>
+      <link>https://www.ipeapea.cn/tags/bolt/</link>
+      <pubDate>Sun, 02 May 2021 13:35:13 +0800</pubDate>
+      
+      <guid>https://www.ipeapea.cn/tags/bolt/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>asm</title>
+      <link>https://www.ipeapea.cn/tags/asm/</link>
+      <pubDate>Thu, 15 Apr 2021 02:09:52 +0800</pubDate>
+      
+      <guid>https://www.ipeapea.cn/tags/asm/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>benchmark</title>
+      <link>https://www.ipeapea.cn/tags/benchmark/</link>
+      <pubDate>Sat, 10 Apr 2021 15:25:29 +0800</pubDate>
+      
+      <guid>https://www.ipeapea.cn/tags/benchmark/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>live</title>
+      <link>https://www.ipeapea.cn/tags/live/</link>
+      <pubDate>Sat, 20 Mar 2021 14:18:59 +0800</pubDate>
+      
+      <guid>https://www.ipeapea.cn/tags/live/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>tool</title>
+      <link>https://www.ipeapea.cn/tags/tool/</link>
+      <pubDate>Wed, 13 Jan 2021 19:05:38 +0800</pubDate>
+      
+      <guid>https://www.ipeapea.cn/tags/tool/</guid>
+      <description></description>
+    </item>
+    
+  </channel>
+</rss>

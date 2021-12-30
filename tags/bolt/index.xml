@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>bolt on 静心台--keep learning and keep moving</title>
+    <link>https://www.ipeapea.cn/tags/bolt/</link>
+    <description>Recent content in bolt on 静心台--keep learning and keep moving</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh-cn</language>
+    <copyright>CopyRight@2010-2030 ipeapea.cn 蜀ICP备2021020797号</copyright>
+    <lastBuildDate>Sun, 02 May 2021 13:35:13 +0800</lastBuildDate><atom:link href="https://www.ipeapea.cn/tags/bolt/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Bolt源码分析（二）--数据结构解读</title>
+      <link>https://www.ipeapea.cn/post/bolt2_reading/</link>
+      <pubDate>Sun, 02 May 2021 13:35:13 +0800</pubDate>
+      
+      <guid>https://www.ipeapea.cn/post/bolt2_reading/</guid>
+      <description>&lt;p&gt;&amp;hellip;接上文，继续分析结构体&lt;code&gt;node&lt;/code&gt;，一个&lt;code&gt;node&lt;/code&gt;对应一个&lt;code&gt;page&lt;/code&gt;页在运行时结构，其定义如下&lt;/p&gt;</description>
+    </item>
+    
+    <item>
+      <title>Bolt源码分析（一）--数据结构解读</title>
+      <link>https://www.ipeapea.cn/post/bolt_reading/</link>
+      <pubDate>Wed, 28 Apr 2021 23:45:39 +0800</pubDate>
+      
+      <guid>https://www.ipeapea.cn/post/bolt_reading/</guid>
+      <description>&lt;p&gt;本文作为bolt的入门篇，介绍几个bolt的基本数据结构&lt;/p&gt;</description>
+    </item>
+    
+  </channel>
+</rss>

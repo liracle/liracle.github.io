@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <title>GIT-说点不一样的东西 - 静心台--keep learning and keep moving</title>
+  <meta name="renderer" content="webkit" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+<meta name="theme-color" content="#f8f5ec" />
+<meta name="msapplication-navbutton-color" content="#f8f5ec">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
+
+
+<meta name="author" content="ipeapea" /><meta name="description" content="我们都知道git每一次提交都是保存的当前快照的全量数据，通过HEAD指向的tree类型数据库可以索引到" /><meta name="keywords" content="git, git blame" />
+
+
+
+
+
+
+<meta name="generator" content="Hugo 0.82.0 with theme even" />
+
+
+<link rel="canonical" href="https://www.ipeapea.cn/post/git_something/" />
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="manifest" href="/manifest.json">
+<link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
+
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+<link href="/sass/main.min.548ea1653e68f925e56a61a2d6231c74fd8bf61fa6007a23a36d99d3058899e3.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.css" integrity="sha256-7TyXnr2YU040zfSP+rEcz29ggW4j56/ujTPwjMzyqFY=" crossorigin="anonymous">
+
+
+<meta property="og:title" content="GIT-说点不一样的东西" />
+<meta property="og:description" content="我们都知道git每一次提交都是保存的当前快照的全量数据，通过HEAD指向的tree类型数据库可以索引到" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://www.ipeapea.cn/post/git_something/" /><meta property="article:section" content="post" />
+<meta property="article:published_time" content="2021-12-26T23:19:17&#43;08:00" />
+<meta property="article:modified_time" content="2021-12-26T23:19:17&#43;08:00" />
+
+<meta itemprop="name" content="GIT-说点不一样的东西">
+<meta itemprop="description" content="我们都知道git每一次提交都是保存的当前快照的全量数据，通过HEAD指向的tree类型数据库可以索引到"><meta itemprop="datePublished" content="2021-12-26T23:19:17&#43;08:00" />
+<meta itemprop="dateModified" content="2021-12-26T23:19:17&#43;08:00" />
+<meta itemprop="wordCount" content="1859">
+<meta itemprop="keywords" content="" /><meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="GIT-说点不一样的东西"/>
+<meta name="twitter:description" content="我们都知道git每一次提交都是保存的当前快照的全量数据，通过HEAD指向的tree类型数据库可以索引到"/>
+
+<!--[if lte IE 9]>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js"></script>
+<![endif]-->
+
+<!--[if lt IE 9]>
+  <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+<![endif]-->
+
+</head>
+<body>
+  <div id="mobile-navbar" class="mobile-navbar">
+  <div class="mobile-header-logo">
+    <a href="/" class="logo">静心台</a>
+  </div>
+  <div class="mobile-navbar-icon">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+</div>
+<nav id="mobile-menu" class="mobile-menu slideout-menu">
+  <ul class="mobile-menu-list">
+    <a href="/">
+        <li class="mobile-menu-item">Home</li>
+      </a><a href="/post/">
+        <li class="mobile-menu-item">Archives</li>
+      </a><a href="/live/">
+        <li class="mobile-menu-item">Life</li>
+      </a><a href="/tags/">
+        <li class="mobile-menu-item">Tags</li>
+      </a><a href="/about/">
+        <li class="mobile-menu-item">About</li>
+      </a>
+  </ul>
+
+  
+
+
+</nav>
+
+  <div class="container" id="mobile-panel">
+    <header id="header" class="header">
+        <div class="logo-wrapper">
+  <a href="/" class="logo">静心台</a>
+</div>
+
+
+
+
+
+<nav class="site-navbar">
+  <ul id="menu" class="menu">
+    <li class="menu-item">
+        <a class="menu-item-link" href="/">Home</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/post/">Archives</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/live/">Life</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/tags/">Tags</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/about/">About</a>
+      </li>
+  </ul>
+</nav>
+
+    </header>
+
+    <main id="main" class="main">
+      <div class="content-wrapper">
+        <div id="content" class="content">
+          <article class="post">
+    
+    <header class="post-header">
+      <h1 class="post-title">GIT-说点不一样的东西</h1>
+
+      <div class="post-meta">
+        <span class="post-time"> 2021-12-26 </span>
+        <div class="post-category">
+            <a href="/categories/git/"> git </a>
+            </div>
+          <span class="more-meta"> 约 1859 字 </span>
+          <span class="more-meta"> 预计阅读 4 分钟 </span>
+        <span id="busuanzi_container_page_pv" class="more-meta"> <span id="busuanzi_value_page_pv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> 次阅读 </span>
+      </div>
+    </header>
+
+    
+    <div class="post-content">
+      <p>我们知道git是一个分布式版本控制系统，本地目录<code>.git/objects/</code>扮演着数据库（键值对数据库）的角色，里面有<code>blob</code>、<code>tree</code>、<code>commit</code>、<code>tag</code>类型，每一次提交保存的都是完整数据的一次快照。而我一直好奇的有两个点：一是这个全量数据中会记录<code>author</code>和<code>commit time</code>等信息吗？二是像<code>git cherry-pick</code>和<code>git rebase</code>这些指令可以将某一次提交的改动作为操作单元是如何实现的，按照<code>blob</code>的定义，每一次<code>commit</code>也是保存的全量数据呀。</p>
+<p>存储全量数据的好处显而易见，要复现某一次历史时刻的提交<code>commit</code>，只需要按图索骥，根据<code>commit</code>-&gt;<code>tree</code>-&gt;<code>tree/blob</code>对象找到对应数据文件即可，这样不用遍历所有历史提交记录,这样提升了效率。另外<code>git blame</code>是我们平时用于查看代码作者和提交时间的，那<code>blame</code>的执行是否需要往前追溯历史去查找代码作者和比较时间呢，其底层具体是怎么执行的呢？<code>git cherry-pick</code>指令可以将某一次提交记录使用到另一个分支上，那么各位可否想过，如果每一次提交都是保存的全量快照数据，那么git是如何实现<code>git cherry-pick</code>的呢？</p>
+<p>带着好奇心，我们一步一步来解答这些问题。
+首先是我们验证下git确实没有单独保存文件各行的author和commit时间（这样做不合理，存储量也大）</p>
+<h2 id="author和commit-time只存储在commit对象中"><code>author</code>和<code>commit time</code>只存储在<code>commit</code>对象中</h2>
+<p>验证很简单，找到几种类型的对象，看下具体的存储内容即可，这里图方便，就从GIT官网摘了相关数据过来(<a href="https://git-scm.com/book/en/v2/Git-Internals-Git-Objects">https://git-scm.com/book/en/v2/Git-Internals-Git-Objects</a>)</p>
+<ul>
+<li><code>blob</code>对象，存储具体文件数据</li>
+<li><code>tree</code>对象，存储文件目录</li>
+<li><code>commit</code>对象，存储某一次提交信息
+我们重点看下<code>commit</code>对象的数据</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-shell" data-lang="shell">tree 0af6e9faec5aeeac05de91104c9247689be6d78e
+parent 575655271438f8a43f67b70e9bba2bc17702128f
+author xieli &lt;xieli@tencent.com&gt; <span class="m">1640530195</span> +0800
+committer xieli &lt;xieli@tencent.com&gt; <span class="m">1640530195</span> +0800
+
+version <span class="m">3</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>这是我所找到的所有有关<code>author</code>和<code>commit time</code>唯一的数据了。那么<code>git blame</code>也一定是通过<code>commit</code>对象拿到的信息了。</p>
+<h2 id="git-blame是根据比对tree对象和parent的差异获取到author和commit-time的"><code>git blame</code>是根据比对<code>tree</code>对象和<code>parent</code>的差异获取到<code>author</code>和<code>commit time</code>的。</h2>
+<p>有两个方法可以验证，我们先看一个简单的方法，根据我们所掌握的知识点，因为<code>author</code>等信息都只存储在<code>commit</code>对象中，那么<code>git blame</code>要获取某一行代码的作者等信息只能对比连续两次<code>commit</code>中文件中代码获得
+假设当前<code>tree</code>对象如下：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-shell" data-lang="shell">tree <span class="m">22222</span>
+parent <span class="m">11111</span>
+author zhangsan ...
+</code></pre></td></tr></table>
+</div>
+</div><p>在提交commit<code>22222</code>中文件<code>file1</code>如下：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-ini" data-lang="ini"><span class="na">version 1</span>
+<span class="na">version 2</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>在提交commit<code>11111</code>中文件<code>file1</code>如下：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-ini" data-lang="ini"><span class="na">version 1</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>两者对比，可知<code>version 2</code>是这次提交新增的，那么这一行就可以标记为<code>zhangsan</code>，至于<code>version 1</code>的作者就得再继续往前追溯了。
+这里啰嗦了很多，主要是想把这里的逻辑说清楚。按照我们这个逻辑，假设我们当前仓库版本只有一个提交历史记录的情况下，执行<code>git blame</code>应该就只会显示最近一次提交的<code>author</code>了。</p>
+<ul>
+<li>方法一</li>
+</ul>
+<p>我们可以找到一个有很多历史提交记录的仓库，使用<code>git clone --depth=1 ....</code>命令拉取代码，然后执行<code>git blame</code>就能发现所有的文件的<code>author</code>信息都是最近一次提交者。这就验证了我们的猜想。</p>
+<ul>
+<li>方法二</li>
+</ul>
+<p>我们可以玩一点复杂的，来验证我们的猜想，这里会啰嗦一些，大体思路是这样的：
+1、我们连续创建两次<code>commit</code>，修改同一个文件，在同一个文件中得到两行不同提交日期的记录
+2、我们修改第一次提交所指向的<code>blob</code>数据，让其存储的数据变为另外一个内容，这样也就改变了<code>diff</code>的内容，那么文件中的两行数据的提交<code>author</code>都是相同的了。</p>
+<p>下面我们详细来操作下：</p>
+<blockquote>
+<p><code>git init .</code>，同时在另个窗口执行<code>watch -n 3 tree .git/objects/</code>查看 <code>objects</code>下的变动</p>
+</blockquote>
+<blockquote>
+<p><code>echo &quot;version 1&quot; &gt; file1.txt; git add file1.txt; git commit -m &quot;version 1&quot;;</code></p>
+</blockquote>
+<blockquote>
+<p>可以通过<code>git cat-file -p 83baae</code>等查看存储信息</p>
+</blockquote>
+<blockquote>
+<p><code>echo &quot;version 2&quot; &gt;&gt; file2.txt; git add file1.txt; git commit -m &quot;version 2&quot;;</code></p>
+</blockquote>
+<blockquote>
+<p><code>git blame file1.txt</code></p>
+</blockquote>
+<p><img src="/images/git_blame1.png" alt="git_blame">
+可以看到两行代码的提交时间不一致</p>
+<blockquote>
+<p>我们再创建一个<code>blob</code>对象，以下命令会往<code>objects</code>文件下写入一个新的<code>blob</code>对象</p>
+</blockquote>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-shell" data-lang="shell"><span class="nb">echo</span> <span class="s2">&#34;fake version&#34;</span><span class="p">|</span>git hash-object -w --stdin
+8ef8975141a1dbe936f16042792d839091dff7c2
+</code></pre></td></tr></table>
+</div>
+</div><blockquote>
+<p>我们再将第一次提交的<code>file1</code>的<code>blob</code>文件修改为指向我们新创建的<code>blob</code>对象</p>
+</blockquote>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-shell" data-lang="shell">rm -rf .git/objects/83/baae61804e65cc73a7201a7252750c76066a30
+mv .git/objects/8e/f8975141a1dbe936f16042792d839091dff7c2 .git/objects/83/baae61804e65cc73a7201a7252750c76066a30
+</code></pre></td></tr></table>
+</div>
+</div><blockquote>
+<p><code>git blame file1.txt</code>会发现显示的<code>author</code>信息已经变了</p>
+</blockquote>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-shell" data-lang="shell">8945edb2 <span class="o">(</span>xieli 2021-12-27 00:36:04 +0800 1<span class="o">)</span> version <span class="m">1</span>
+8945edb2 <span class="o">(</span>xieli 2021-12-27 00:36:04 +0800 2<span class="o">)</span> version <span class="m">2</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>这也就验证了我们的想法。
+<img src="/images/git_blame2.png" alt=""></p>
+<p>同理<code>git cherry-pick</code>方法也是通过对比两次相邻<code>commit</code>得到的差异部分，再将差异部分应用到当前分支上面。</p>
+    </div>
+
+    
+<footer class="post-footer">
+      
+      <nav class="post-nav">
+        
+        <a class="next" href="/post/go-url/">
+            <span class="next-text nav-default">认识GO语言url.URL结构体</span>
+            <span class="next-text nav-mobile">下一篇</span>
+            <i class="iconfont icon-right"></i>
+          </a>
+      </nav>
+    </footer>
+  </article>
+        </div>
+        
+
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="social-links">
+      <a href="mailto:liracle1@126.com" class="iconfont icon-email" title="email"></a>
+      <a href="https://github.com/liracle/" class="iconfont icon-github" title="github"></a>
+  <a href="https://www.ipeapea.cn/index.xml" type="application/rss+xml" class="iconfont icon-rss" title="rss"></a>
+</div>
+
+<div class="copyright">
+  
+
+  <div class="busuanzi-footer">
+    <span id="busuanzi_container_site_pv"> 本站总访问量 <span id="busuanzi_value_site_pv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> 次 </span>
+      <span class="division">|</span>
+    <span id="busuanzi_container_site_uv"> 本站总访客数 <span id="busuanzi_value_site_uv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> 人 </span>
+  </div>
+
+  <span class="copyright-year">
+    &copy; 
+    2021<span class="heart"><i class="iconfont icon-heart"></i></span><span>CopyRight@2010-2030 ipeapea.cn 蜀ICP备2021020797号</span>
+  </span>
+</div>
+
+    </footer>
+
+    <div class="back-to-top" id="back-to-top">
+      <i class="iconfont icon-up"></i>
+    </div>
+  </div>
+  
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.2.1/dist/jquery.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/slideout@1.0.1/dist/slideout.min.js" integrity="sha256-t+zJ/g8/KXIJMjSVQdnibt4dlaDxc9zXr/9oNPeWqdg=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.js" integrity="sha256-XVLffZaxoWfGUEbdzuLi7pwaUJv1cecsQJQqGLe7axY=" crossorigin="anonymous"></script>
+
+
+
+<script type="text/javascript" src="/js/main.min.c99b103c33d1539acf3025e1913697534542c4a5aa5af0ccc20475ed2863603b.js"></script>
+
+
+
+
+
+
+
+
+</body>
+</html>

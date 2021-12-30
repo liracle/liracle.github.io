@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>benchmark on 静心台--keep learning and keep moving</title>
+    <link>https://www.ipeapea.cn/tags/benchmark/</link>
+    <description>Recent content in benchmark on 静心台--keep learning and keep moving</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh-cn</language>
+    <copyright>CopyRight@2010-2030 ipeapea.cn 蜀ICP备2021020797号</copyright>
+    <lastBuildDate>Sat, 10 Apr 2021 15:25:29 +0800</lastBuildDate><atom:link href="https://www.ipeapea.cn/tags/benchmark/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Go Benchmark理解</title>
+      <link>https://www.ipeapea.cn/post/go-benchmark/</link>
+      <pubDate>Sat, 10 Apr 2021 15:25:29 +0800</pubDate>
+      
+      <guid>https://www.ipeapea.cn/post/go-benchmark/</guid>
+      <description>&lt;h2 id=&#34;前言&#34;&gt;前言&lt;/h2&gt;
+&lt;p&gt;go语言本身提供了基准测试的支持，基准测试有以下要求&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;文件以_test.go结尾&lt;/li&gt;
+&lt;li&gt;基准测试函数以Benchmark开头&lt;/li&gt;
+&lt;li&gt;函数参数为*testing.B 类型，无返回值&lt;/li&gt;
+&lt;/ul&gt;</description>
+    </item>
+    
+  </channel>
+</rss>

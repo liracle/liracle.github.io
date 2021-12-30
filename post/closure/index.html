@@ -1,0 +1,764 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <title>GO闭包实现底层分析 - 静心台--keep learning and keep moving</title>
+  <meta name="renderer" content="webkit" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+<meta name="theme-color" content="#f8f5ec" />
+<meta name="msapplication-navbutton-color" content="#f8f5ec">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
+
+
+<meta name="author" content="ipeapea" /><meta name="description" content="闭包函数是指引用了自由变量的函数，如下
+1 2 3 4 5 6  func create() func() int { c := 2 // 自由变量 	return func() int { return c // 引用了自由变量 	} }   " /><meta name="keywords" content="go, 闭包" />
+
+
+
+
+
+
+<meta name="generator" content="Hugo 0.82.0 with theme even" />
+
+
+<link rel="canonical" href="https://www.ipeapea.cn/post/closure/" />
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="manifest" href="/manifest.json">
+<link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
+
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+<link href="/sass/main.min.548ea1653e68f925e56a61a2d6231c74fd8bf61fa6007a23a36d99d3058899e3.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.css" integrity="sha256-7TyXnr2YU040zfSP+rEcz29ggW4j56/ujTPwjMzyqFY=" crossorigin="anonymous">
+
+
+<meta property="og:title" content="GO闭包实现底层分析" />
+<meta property="og:description" content="闭包函数是指引用了自由变量的函数，如下
+
+
+1
+2
+3
+4
+5
+6
+
+
+func create() func() int {
+	c := 2     // 自由变量
+	return func() int {
+		return c  // 引用了自由变量
+	}
+}
+
+
+" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://www.ipeapea.cn/post/closure/" /><meta property="article:section" content="post" />
+<meta property="article:published_time" content="2021-05-04T15:27:58&#43;08:00" />
+<meta property="article:modified_time" content="2021-05-04T15:27:58&#43;08:00" />
+
+<meta itemprop="name" content="GO闭包实现底层分析">
+<meta itemprop="description" content="闭包函数是指引用了自由变量的函数，如下
+
+
+1
+2
+3
+4
+5
+6
+
+
+func create() func() int {
+	c := 2     // 自由变量
+	return func() int {
+		return c  // 引用了自由变量
+	}
+}
+
+
+"><meta itemprop="datePublished" content="2021-05-04T15:27:58&#43;08:00" />
+<meta itemprop="dateModified" content="2021-05-04T15:27:58&#43;08:00" />
+<meta itemprop="wordCount" content="3048">
+<meta itemprop="keywords" content="go," /><meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="GO闭包实现底层分析"/>
+<meta name="twitter:description" content="闭包函数是指引用了自由变量的函数，如下
+
+
+1
+2
+3
+4
+5
+6
+
+
+func create() func() int {
+	c := 2     // 自由变量
+	return func() int {
+		return c  // 引用了自由变量
+	}
+}
+
+
+"/>
+
+<!--[if lte IE 9]>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js"></script>
+<![endif]-->
+
+<!--[if lt IE 9]>
+  <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+<![endif]-->
+
+</head>
+<body>
+  <div id="mobile-navbar" class="mobile-navbar">
+  <div class="mobile-header-logo">
+    <a href="/" class="logo">静心台</a>
+  </div>
+  <div class="mobile-navbar-icon">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+</div>
+<nav id="mobile-menu" class="mobile-menu slideout-menu">
+  <ul class="mobile-menu-list">
+    <a href="/">
+        <li class="mobile-menu-item">Home</li>
+      </a><a href="/post/">
+        <li class="mobile-menu-item">Archives</li>
+      </a><a href="/live/">
+        <li class="mobile-menu-item">Life</li>
+      </a><a href="/tags/">
+        <li class="mobile-menu-item">Tags</li>
+      </a><a href="/about/">
+        <li class="mobile-menu-item">About</li>
+      </a>
+  </ul>
+
+  
+
+
+</nav>
+
+  <div class="container" id="mobile-panel">
+    <header id="header" class="header">
+        <div class="logo-wrapper">
+  <a href="/" class="logo">静心台</a>
+</div>
+
+
+
+
+
+<nav class="site-navbar">
+  <ul id="menu" class="menu">
+    <li class="menu-item">
+        <a class="menu-item-link" href="/">Home</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/post/">Archives</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/live/">Life</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/tags/">Tags</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/about/">About</a>
+      </li>
+  </ul>
+</nav>
+
+    </header>
+
+    <main id="main" class="main">
+      <div class="content-wrapper">
+        <div id="content" class="content">
+          <article class="post">
+    
+    <header class="post-header">
+      <h1 class="post-title">GO闭包实现底层分析</h1>
+
+      <div class="post-meta">
+        <span class="post-time"> 2021-05-04 </span>
+        
+          <span class="more-meta"> 约 3048 字 </span>
+          <span class="more-meta"> 预计阅读 7 分钟 </span>
+        <span id="busuanzi_container_page_pv" class="more-meta"> <span id="busuanzi_value_page_pv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> 次阅读 </span>
+      </div>
+    </header>
+
+    <div class="post-toc" id="post-toc">
+  <h2 class="post-toc-title">文章目录</h2>
+  <div class="post-toc-content always-active">
+    <nav id="TableOfContents">
+  <ul>
+    <li><a href="#从代码出发">从代码出发</a></li>
+    <li><a href="#create对应的汇编分析"><code>create</code>对应的汇编分析</a></li>
+    <li><a href="#main函数汇编分析"><code>main</code>函数汇编分析</a></li>
+    <li><a href="#闭包代码的汇编分析">闭包代码的汇编分析</a></li>
+    <li><a href="#疑问">疑问</a></li>
+    <li><a href="#验证">验证</a></li>
+  </ul>
+</nav>
+  </div>
+</div>
+    <div class="post-content">
+      <p>闭包函数是指引用了自由变量的函数，如下</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">func</span> <span class="nf">create</span><span class="p">()</span> <span class="kd">func</span><span class="p">()</span> <span class="kt">int</span> <span class="p">{</span>
+	<span class="nx">c</span> <span class="o">:=</span> <span class="mi">2</span>     <span class="c1">// 自由变量
+</span><span class="c1"></span>	<span class="k">return</span> <span class="kd">func</span><span class="p">()</span> <span class="kt">int</span> <span class="p">{</span>
+		<span class="k">return</span> <span class="nx">c</span>  <span class="c1">// 引用了自由变量
+</span><span class="c1"></span>	<span class="p">}</span>
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><h2 id="从代码出发">从代码出发</h2>
+<p>本文章分析的完整代码如下</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">package</span> <span class="nx">main</span>
+
+<span class="kn">import</span> <span class="p">(</span>
+	<span class="s">&#34;fmt&#34;</span>
+<span class="p">)</span>
+
+<span class="kd">func</span> <span class="nf">create</span><span class="p">()</span> <span class="kd">func</span><span class="p">()</span> <span class="kt">int</span> <span class="p">{</span>
+	<span class="nx">c</span> <span class="o">:=</span> <span class="mi">2</span>
+	<span class="k">return</span> <span class="kd">func</span><span class="p">()</span> <span class="kt">int</span> <span class="p">{</span>
+		<span class="k">return</span> <span class="nx">c</span>
+	<span class="p">}</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+	<span class="nx">f1</span> <span class="o">:=</span> <span class="nf">create</span><span class="p">()</span>
+	<span class="nx">fmt</span><span class="p">.</span><span class="nf">Println</span><span class="p">(</span><span class="nf">f1</span><span class="p">())</span>
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><p><code>create</code>函数返回了闭包函数，该闭包函数引用了自由变量<code>c</code>，下面来分析该闭包的实现</p>
+<h2 id="create对应的汇编分析"><code>create</code>对应的汇编分析</h2>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-fallback" data-lang="fallback">&#34;&#34;.create STEXT size=126 args=0x8 locals=0x28 funcid=0x0
+        0x0000 00000 (for.go:7) TEXT    &#34;&#34;.create(SB), ABIInternal, $40-8
+        0x0000 00000 (for.go:7) MOVQ    (TLS), CX
+        0x0009 00009 (for.go:7) CMPQ    SP, 16(CX)
+        0x000d 00013 (for.go:7) PCDATA  $0, $-2
+        0x000d 00013 (for.go:7) JLS     119
+        0x000f 00015 (for.go:7) PCDATA  $0, $-1
+        0x000f 00015 (for.go:7) SUBQ    $40, SP # SP向下扩栈
+        0x0013 00019 (for.go:7) MOVQ    BP, 32(SP) # 保存父函数BP
+        0x0018 00024 (for.go:7) LEAQ    32(SP), BP # BP指向当前函数的BP
+        0x001d 00029 (for.go:7) FUNCDATA        $0, gclocals·2a5305abe05176240e61b8620e19a815(SB)
+        0x001d 00029 (for.go:7) FUNCDATA        $1, gclocals·2a5305abe05176240e61b8620e19a815(SB)
+        0x001d 00029 (for.go:7) MOVQ    $0, &#34;&#34;.~r0+48(SP) # 初始化返回值
+        0x0026 00038 (for.go:8) MOVQ    $2, &#34;&#34;.c+16(SP) # 初始化变量c
+        0x002f 00047 (for.go:9) LEAQ    type.noalg.struct { F uintptr; &#34;&#34;.c int }(SB), AX  # 编译时生成的一个闭包结构体
+        0x0036 00054 (for.go:9) MOVQ    AX, (SP)  # 将闭包结构体信息保存在SP指向的内存地址，该地址会作为runtime.newobject的输入参数，还记得GO函数调用的约定吧，返回该闭包结构体的指针，返回地址为8(SP)
+        0x003a 00058 (for.go:9) PCDATA  $1, $0
+        0x003a 00058 (for.go:9) CALL    runtime.newobject(SB) # new闭包结构体对象
+        0x003f 00063 (for.go:9) MOVQ    8(SP), AX  # 将闭包指针放入AX
+        0x0044 00068 (for.go:9) MOVQ    AX, &#34;&#34;..autotmp_2+24(SP) # 将闭包指针放入24(SP)
+        0x0049 00073 (for.go:9) LEAQ    &#34;&#34;.create.func1(SB), CX # CX寄存区存入create.func1函数地址
+        0x0050 00080 (for.go:9) MOVQ    CX, (AX) # 将create.func1函数地址存入闭包指针中，也就是闭包结构体中的F字段
+        0x0053 00083 (for.go:9) MOVQ    &#34;&#34;..autotmp_2+24(SP), AX 
+        0x0058 00088 (for.go:9) TESTB   AL, (AX)
+        0x005a 00090 (for.go:9) MOVQ    &#34;&#34;.c+16(SP), CX # 将自有变量c存入CX寄存器
+        0x005f 00095 (for.go:9) MOVQ    CX, 8(AX) #将自有变量c放入闭包结构体中的c字段
+        0x0063 00099 (for.go:9) MOVQ    &#34;&#34;..autotmp_2+24(SP), AX
+        0x0068 00104 (for.go:9) MOVQ    AX, &#34;&#34;.~r0+48(SP)
+        0x006d 00109 (for.go:9) MOVQ    32(SP), BP
+        0x0072 00114 (for.go:9) ADDQ    $40, SP
+        0x0076 00118 (for.go:9) RET
+        0x0077 00119 (for.go:9) NOP
+        0x0077 00119 (for.go:7) PCDATA  $1, $-1
+        0x0077 00119 (for.go:7) PCDATA  $0, $-2
+        0x0077 00119 (for.go:7) CALL    runtime.morestack_noctxt(SB)
+        0x007c 00124 (for.go:7) PCDATA  $0, $-1
+        0x007c 00124 (for.go:7) JMP     0
+</code></pre></td></tr></table>
+</div>
+</div><p><img src="/images/closure/closure_analysis.png" alt="">
+从汇编中可以看到<code>create</code>函数实际返回的是一个结构体指针，该结构体定义如下</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">type</span> <span class="nx">noalg</span> <span class="kd">struct</span> <span class="p">{</span>
+	<span class="nx">F</span> <span class="kt">uintptr</span>
+	<span class="nx">c</span> <span class="kt">int</span>
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>这个结构体定义在编译时生成。</p>
+<h2 id="main函数汇编分析"><code>main</code>函数汇编分析</h2>
+<p>我们想要的是一个类型为<code>func () int</code> 的函数，但是返回了一个结构体指针，那么实际在调用的时候发生了什么呢，我们接下来继续看汇编</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-fallback" data-lang="fallback">&#34;&#34;.main STEXT size=485 args=0x0 locals=0xf0 funcid=0x0
+        0x0000 00000 (for.go:14)        TEXT    &#34;&#34;.main(SB), ABIInternal, $240-0
+        0x0000 00000 (for.go:14)        MOVQ    (TLS), CX
+        0x0009 00009 (for.go:14)        LEAQ    -112(SP), AX
+        0x000e 00014 (for.go:14)        CMPQ    AX, 16(CX)
+        0x0012 00018 (for.go:14)        PCDATA  $0, $-2
+        0x0012 00018 (for.go:14)        JLS     471
+        0x0018 00024 (for.go:14)        PCDATA  $0, $-1
+        0x0018 00024 (for.go:14)        SUBQ    $240, SP
+        0x001f 00031 (for.go:14)        MOVQ    BP, 232(SP)
+        0x0027 00039 (for.go:14)        LEAQ    232(SP), BP
+        0x002f 00047 (for.go:14)        FUNCDATA        $0, gclocals·33cdeccccebe80329f1fdbee7f5874cb(SB)
+        0x002f 00047 (for.go:14)        FUNCDATA        $1, gclocals·2f4566c65595035c8390cb8744947365(SB)
+        0x002f 00047 (for.go:14)        FUNCDATA        $2, &#34;&#34;.main.stkobj(SB)
+        0x002f 00047 (for.go:15)        PCDATA  $1, $0
+        0x002f 00047 (for.go:15)        CALL    &#34;&#34;.create(SB) # 期望返回函数对象，实际返回的一个结构体指针
+        0x0034 00052 (for.go:15)        MOVQ    (SP), DX # 将结构体指针赋值给DX寄存器
+        0x0038 00056 (for.go:15)        MOVQ    DX, &#34;&#34;.f1+88(SP)
+        0x003d 00061 (for.go:16)        MOVQ    (DX), AX # 取出结构体中的F字段值（实际为闭包函数地址），赋值给AX寄存器
+        0x0040 00064 (for.go:16)        CALL    AX # 发起调用
+        0x0042 00066 (for.go:16)        MOVQ    (SP), AX
+        0x0046 00070 (for.go:16)        MOVQ    AX, &#34;&#34;..autotmp_7+72(SP)
+        0x004b 00075 (for.go:16)        MOVQ    AX, (SP)
+</code></pre></td></tr></table>
+</div>
+</div><p>这里可以发现，对于闭包函数的调用和正常函数的调用有很大区别，一般函数的调用，是<code>caller</code>准备好函数入参后，调用<code>call</code>指令，但是对于闭包函数的调用，这里是将闭包结构体地址存入DX寄存器后，发起调用，这其实是GO语言闭包函数调用的约定。</p>
+<h2 id="闭包代码的汇编分析">闭包代码的汇编分析</h2>
+<p>接下来，继续看看闭包函数的代码</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-fallback" data-lang="fallback">&#34;&#34;.create.func1 STEXT nosplit size=50 args=0x8 locals=0x10 funcid=0x0
+        0x0000 00000 (for.go:9) TEXT    &#34;&#34;.create.func1(SB), NOSPLIT|NEEDCTXT|ABIInternal, $16-8
+        0x0000 00000 (for.go:9) SUBQ    $16, SP  # 函数栈帧初始化，扩栈操作
+        0x0004 00004 (for.go:9) MOVQ    BP, 8(SP) # 保存父函数BP
+        0x0009 00009 (for.go:9) LEAQ    8(SP), BP # 设置当前函数BP
+        0x000e 00014 (for.go:9) FUNCDATA        $0, gclocals·33cdeccccebe80329f1fdbee7f5874cb(SB)
+        0x000e 00014 (for.go:9) FUNCDATA        $1, gclocals·33cdeccccebe80329f1fdbee7f5874cb(SB)
+        0x000e 00014 (for.go:9) MOVQ    8(DX), AX  # 从DX+8地址读取变量c
+        0x0012 00018 (for.go:9) MOVQ    AX, &#34;&#34;.c(SP) # 变量c写入到SP地址处
+        0x0016 00022 (for.go:9) MOVQ    $0, &#34;&#34;.~r0+24(SP)  # 初始化返回值
+        0x001f 00031 (for.go:10)        MOVQ    &#34;&#34;.c(SP), AX # 将c写入AX
+        0x0023 00035 (for.go:10)        MOVQ    AX, &#34;&#34;.~r0+24(SP) # 将AX 写入返回值
+        0x0028 00040 (for.go:10)        MOVQ    8(SP), BP # 回复函数调用现场，恢复BP
+        0x002d 00045 (for.go:10)        ADDQ    $16, SP # 恢复SP
+        0x0031 00049 (for.go:10)        RET
+</code></pre></td></tr></table>
+</div>
+</div><p><code>create.func</code>是我们代码中第9、10行定义的闭包函数，从汇编源码中，可以看到闭包函数的执行逻辑，获取自由变量的逻辑，是从寄存器DX中读取闭包结构体地址+偏移的方式，和一般函数的调用获取参数不一样。</p>
+<h2 id="疑问">疑问</h2>
+<p>到这里，我们基本已经了解了GO语言中闭包的实现原理了。</p>
+<p>这里可以再思考一下，为什么闭包函数中对于自由变量的读取逻辑需要通过DX寄存器+偏移的方式呢，为啥不能和正常函数调用一样，通过SP+偏移的方式呢？</p>
+<p>这是因为SP+偏移的方式，调用者需要知道被调用者入参个数及类型，这样在编译期间，编译器可以根据函数签名安排好函数栈帧布局，分配好<code>return value</code>, <code>param var</code>等栈帧布局，GO语言函数栈帧布局如下</p>
+<p><img src="/images/goroutine%E6%A0%88%E5%B8%A7%E7%BB%93%E6%9E%84.png" alt="">
+但是，对于闭包来说，调用者实际并不知道闭包函数中具体引用了多少自由变量，如果调用者也使用这种方式传递函数参数，那么编译就需要去分析每一个被调用者的具体代码逻辑，增加了编译器的复杂度和实现难度。所以闭包的调用使用了一种比较取巧的方式，调用者只需要将闭包结构体地址放入DX寄存器中，在闭包的实现逻辑中，按照DX+偏移的方式去取对应的自由变量值即可。</p>
+<p>闭包的实现，很多是编译器帮忙处理的，编译期间分析代码，捕获自由变量，生成闭包函数结构体定义等等，闭包函数结构体本身有一个类型原型，在<code>runtime.funcval</code>，定义如下</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-go" data-lang="go"><span class="c1">// runtime/runtime2.go:198
+</span><span class="c1"></span><span class="kd">type</span> <span class="nx">funcval</span> <span class="kd">struct</span> <span class="p">{</span>
+	<span class="nx">fn</span> <span class="kt">uintptr</span>
+	<span class="c1">// variable-size, fn-specific data here
+</span><span class="c1"></span><span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><h2 id="验证">验证</h2>
+<p>验证闭包结构体的生成，修改代码如下</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-go" data-lang="go"><span class="kn">package</span> <span class="nx">main</span>
+
+<span class="kn">import</span> <span class="p">(</span>
+	<span class="s">&#34;fmt&#34;</span>
+<span class="p">)</span>
+
+<span class="kd">func</span> <span class="nf">create</span><span class="p">()</span> <span class="kd">func</span><span class="p">()</span> <span class="p">(</span><span class="kt">int</span><span class="p">,</span> <span class="kt">int</span><span class="p">)</span> <span class="p">{</span>
+	<span class="nx">a</span> <span class="o">:=</span> <span class="mi">3</span>
+	<span class="nx">b</span> <span class="o">:=</span> <span class="mi">5</span>
+	<span class="k">return</span> <span class="kd">func</span><span class="p">()</span> <span class="p">(</span><span class="kt">int</span><span class="p">,</span> <span class="kt">int</span><span class="p">)</span> <span class="p">{</span>
+		<span class="k">return</span> <span class="nx">a</span><span class="p">,</span> <span class="nx">b</span>
+	<span class="p">}</span>
+<span class="p">}</span>
+
+<span class="kd">func</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+	<span class="nx">f1</span> <span class="o">:=</span> <span class="nf">create</span><span class="p">()</span>
+	<span class="nx">fmt</span><span class="p">.</span><span class="nf">Println</span><span class="p">(</span><span class="nf">f1</span><span class="p">())</span>
+
+<span class="p">}</span>
+
+</code></pre></td></tr></table>
+</div>
+</div><p>对应<code>create</code>函数的汇编如下</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-fallback" data-lang="fallback">&#34;&#34;.create STEXT size=158 args=0x8 locals=0x30 funcid=0x0
+        0x0000 00000 (for.go:7) TEXT    &#34;&#34;.create(SB), ABIInternal, $48-8
+        0x0000 00000 (for.go:7) MOVQ    (TLS), CX
+        0x0009 00009 (for.go:7) CMPQ    SP, 16(CX)
+        0x000d 00013 (for.go:7) PCDATA  $0, $-2
+        0x000d 00013 (for.go:7) JLS     148
+        0x0013 00019 (for.go:7) PCDATA  $0, $-1
+        0x0013 00019 (for.go:7) SUBQ    $48, SP
+        0x0017 00023 (for.go:7) MOVQ    BP, 40(SP)
+        0x001c 00028 (for.go:7) LEAQ    40(SP), BP
+        0x0021 00033 (for.go:7) FUNCDATA        $0, gclocals·2a5305abe05176240e61b8620e19a815(SB)
+        0x0021 00033 (for.go:7) FUNCDATA        $1, gclocals·2a5305abe05176240e61b8620e19a815(SB)
+        0x0021 00033 (for.go:7) MOVQ    $0, &#34;&#34;.~r0+56(SP)
+        0x002a 00042 (for.go:8) MOVQ    $3, &#34;&#34;.a+24(SP)
+        0x0033 00051 (for.go:9) MOVQ    $5, &#34;&#34;.b+16(SP)
+        0x003c 00060 (for.go:10)        LEAQ    type.noalg.struct { F uintptr; &#34;&#34;.a int; &#34;&#34;.b int }(SB), AX   # 闭包对象结构体定义
+        0x0043 00067 (for.go:10)        MOVQ    AX, (SP)
+        0x0047 00071 (for.go:10)        PCDATA  $1, $0
+        0x0047 00071 (for.go:10)        CALL    runtime.newobject(SB)
+        0x004c 00076 (for.go:10)        MOVQ    8(SP), AX
+        0x0051 00081 (for.go:10)        MOVQ    AX, &#34;&#34;..autotmp_3+32(SP)
+        0x0056 00086 (for.go:10)        LEAQ    &#34;&#34;.create.func1(SB), CX
+        0x005d 00093 (for.go:10)        MOVQ    CX, (AX)
+        0x0060 00096 (for.go:10)        MOVQ    &#34;&#34;..autotmp_3+32(SP), AX
+        0x0065 00101 (for.go:10)        TESTB   AL, (AX)
+        0x0067 00103 (for.go:10)        MOVQ    &#34;&#34;.a+24(SP), CX
+        0x006c 00108 (for.go:10)        MOVQ    CX, 8(AX)
+        0x0070 00112 (for.go:10)        MOVQ    &#34;&#34;..autotmp_3+32(SP), AX
+        0x0075 00117 (for.go:10)        TESTB   AL, (AX)
+        0x0077 00119 (for.go:10)        MOVQ    &#34;&#34;.b+16(SP), CX
+        0x007c 00124 (for.go:10)        MOVQ    CX, 16(AX)
+        0x0080 00128 (for.go:10)        MOVQ    &#34;&#34;..autotmp_3+32(SP), AX
+        0x0085 00133 (for.go:10)        MOVQ    AX, &#34;&#34;.~r0+56(SP)
+        0x008a 00138 (for.go:10)        MOVQ    40(SP), BP
+        0x008f 00143 (for.go:10)        ADDQ    $48, SP
+        0x0093 00147 (for.go:10)        RET
+</code></pre></td></tr></table>
+</div>
+</div><p><code>main</code>函数中的闭包调用代码</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-fallback" data-lang="fallback">&#34;&#34;.main STEXT size=682 args=0x0 locals=0x140 funcid=0x0
+...
+        0x0032 00050 (for.go:16)        CALL    &#34;&#34;.create(SB) # 创建闭包对象
+        0x0037 00055 (for.go:16)        MOVQ    (SP), DX  # 将闭包结构体地址存储到DX集群器
+        0x003b 00059 (for.go:16)        MOVQ    DX, &#34;&#34;.f1+112(SP)
+        0x0040 00064 (for.go:17)        MOVQ    (DX), AX
+        0x0043 00067 (for.go:17)        CALL    AX # 发起调用
+...
+</code></pre></td></tr></table>
+</div>
+</div><p>闭包的实现代码</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-fallback" data-lang="fallback">&#34;&#34;.create.func1 STEXT nosplit size=78 args=0x10 locals=0x18 funcid=0x0
+        0x0000 00000 (for.go:10)        TEXT    &#34;&#34;.create.func1(SB), NOSPLIT|NEEDCTXT|ABIInternal, $24-16
+        0x0000 00000 (for.go:10)        SUBQ    $24, SP
+        0x0004 00004 (for.go:10)        MOVQ    BP, 16(SP)
+        0x0009 00009 (for.go:10)        LEAQ    16(SP), BP
+        0x000e 00014 (for.go:10)        FUNCDATA        $0, gclocals·33cdeccccebe80329f1fdbee7f5874cb(SB)
+        0x000e 00014 (for.go:10)        FUNCDATA        $1, gclocals·33cdeccccebe80329f1fdbee7f5874cb(SB)
+        0x000e 00014 (for.go:10)        MOVQ    8(DX), AX # 通过DX+偏移获取自由变量
+        0x0012 00018 (for.go:10)        MOVQ    AX, &#34;&#34;.a+8(SP)
+        0x0017 00023 (for.go:10)        MOVQ    16(DX), AX # 通过DX+偏移获取自由变量
+        0x001b 00027 (for.go:10)        MOVQ    AX, &#34;&#34;.b(SP)
+        0x001f 00031 (for.go:10)        MOVQ    $0, &#34;&#34;.~r0+32(SP)
+        0x0028 00040 (for.go:10)        MOVQ    $0, &#34;&#34;.~r1+40(SP)
+        0x0031 00049 (for.go:11)        MOVQ    &#34;&#34;.a+8(SP), AX
+        0x0036 00054 (for.go:11)        MOVQ    AX, &#34;&#34;.~r0+32(SP)
+        0x003b 00059 (for.go:11)        MOVQ    &#34;&#34;.b(SP), AX
+        0x003f 00063 (for.go:11)        MOVQ    AX, &#34;&#34;.~r1+40(SP)
+        0x0044 00068 (for.go:11)        MOVQ    16(SP), BP
+        0x0049 00073 (for.go:11)        ADDQ    $24, SP
+        0x004d 00077 (for.go:11)        RET
+</code></pre></td></tr></table>
+</div>
+</div>
+    </div>
+
+    
+<footer class="post-footer">
+      <div class="post-tags">
+          <a href="/tags/go/">go</a>
+          </div>
+      <nav class="post-nav">
+        <a class="prev" href="/post/minikube_learn/">
+            <i class="iconfont icon-left"></i>
+            <span class="prev-text nav-default">Mac本地学习K8s</span>
+            <span class="prev-text nav-mobile">上一篇</span>
+          </a>
+        <a class="next" href="/post/bolt2_reading/">
+            <span class="next-text nav-default">Bolt源码分析（二）--数据结构解读</span>
+            <span class="next-text nav-mobile">下一篇</span>
+            <i class="iconfont icon-right"></i>
+          </a>
+      </nav>
+    </footer>
+  </article>
+        </div>
+        
+
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="social-links">
+      <a href="mailto:liracle1@126.com" class="iconfont icon-email" title="email"></a>
+      <a href="https://github.com/liracle/" class="iconfont icon-github" title="github"></a>
+  <a href="https://www.ipeapea.cn/index.xml" type="application/rss+xml" class="iconfont icon-rss" title="rss"></a>
+</div>
+
+<div class="copyright">
+  
+
+  <div class="busuanzi-footer">
+    <span id="busuanzi_container_site_pv"> 本站总访问量 <span id="busuanzi_value_site_pv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> 次 </span>
+      <span class="division">|</span>
+    <span id="busuanzi_container_site_uv"> 本站总访客数 <span id="busuanzi_value_site_uv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> 人 </span>
+  </div>
+
+  <span class="copyright-year">
+    &copy; 
+    2021<span class="heart"><i class="iconfont icon-heart"></i></span><span>CopyRight@2010-2030 ipeapea.cn 蜀ICP备2021020797号</span>
+  </span>
+</div>
+
+    </footer>
+
+    <div class="back-to-top" id="back-to-top">
+      <i class="iconfont icon-up"></i>
+    </div>
+  </div>
+  
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.2.1/dist/jquery.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/slideout@1.0.1/dist/slideout.min.js" integrity="sha256-t+zJ/g8/KXIJMjSVQdnibt4dlaDxc9zXr/9oNPeWqdg=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.js" integrity="sha256-XVLffZaxoWfGUEbdzuLi7pwaUJv1cecsQJQqGLe7axY=" crossorigin="anonymous"></script>
+
+
+
+<script type="text/javascript" src="/js/main.min.c99b103c33d1539acf3025e1913697534542c4a5aa5af0ccc20475ed2863603b.js"></script>
+
+
+
+
+
+
+
+
+</body>
+</html>

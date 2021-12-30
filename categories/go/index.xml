@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>go on 静心台--keep learning and keep moving</title>
+    <link>https://www.ipeapea.cn/categories/go/</link>
+    <description>Recent content in go on 静心台--keep learning and keep moving</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh-cn</language>
+    <copyright>CopyRight@2010-2030 ipeapea.cn 蜀ICP备2021020797号</copyright>
+    <lastBuildDate>Thu, 15 Apr 2021 02:09:52 +0800</lastBuildDate><atom:link href="https://www.ipeapea.cn/categories/go/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Go Asm</title>
+      <link>https://www.ipeapea.cn/post/go-asm/</link>
+      <pubDate>Thu, 15 Apr 2021 02:09:52 +0800</pubDate>
+      
+      <guid>https://www.ipeapea.cn/post/go-asm/</guid>
+      <description>&lt;blockquote&gt;
+&lt;p&gt;本文最初是在公司内部小组技术分享&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h2 id=&#34;为什么想分享这个知识点&#34;&gt;为什么想分享这个知识点&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;经常性在阅读GO源码时，会追溯到底层的汇编实现，如果不理解，就会懵逼了&lt;/li&gt;
+&lt;li&gt;网上大量的大神在分析某个特性或者实现时，常常都会祭出底层汇编，这也说明，要明白GO底层的很多设计，都必须要了解GO汇编&lt;/li&gt;
+&lt;li&gt;性能优化，代码分析所需，虽然这种情况很少&lt;/li&gt;
+&lt;li&gt;了解底层实现，充实自己的武器库&lt;/li&gt;
+&lt;li&gt;具备部分辩伪能力，学习了GO汇编，多少会对语言特性的底层实现有一些嗅觉&lt;/li&gt;
+&lt;li&gt;装逼，装逼是第一生产力&lt;/li&gt;
+&lt;/ul&gt;</description>
+    </item>
+    
+    <item>
+      <title>Go Benchmark理解</title>
+      <link>https://www.ipeapea.cn/post/go-benchmark/</link>
+      <pubDate>Sat, 10 Apr 2021 15:25:29 +0800</pubDate>
+      
+      <guid>https://www.ipeapea.cn/post/go-benchmark/</guid>
+      <description>&lt;h2 id=&#34;前言&#34;&gt;前言&lt;/h2&gt;
+&lt;p&gt;go语言本身提供了基准测试的支持，基准测试有以下要求&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;文件以_test.go结尾&lt;/li&gt;
+&lt;li&gt;基准测试函数以Benchmark开头&lt;/li&gt;
+&lt;li&gt;函数参数为*testing.B 类型，无返回值&lt;/li&gt;
+&lt;/ul&gt;</description>
+    </item>
+    
+  </channel>
+</rss>

@@ -1,0 +1,841 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <title>Bolt源码分析（一）--数据结构解读 - 静心台--keep learning and keep moving</title>
+  <meta name="renderer" content="webkit" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+<meta name="theme-color" content="#f8f5ec" />
+<meta name="msapplication-navbutton-color" content="#f8f5ec">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="#f8f5ec">
+
+
+<meta name="author" content="ipeapea" /><meta name="description" content="分析记录bolt数据库" /><meta name="keywords" content="go, bolt" />
+
+
+
+
+
+
+<meta name="generator" content="Hugo 0.82.0 with theme even" />
+
+
+<link rel="canonical" href="https://www.ipeapea.cn/post/bolt_reading/" />
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="manifest" href="/manifest.json">
+<link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
+
+<script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+<link href="/sass/main.min.548ea1653e68f925e56a61a2d6231c74fd8bf61fa6007a23a36d99d3058899e3.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.css" integrity="sha256-7TyXnr2YU040zfSP+rEcz29ggW4j56/ujTPwjMzyqFY=" crossorigin="anonymous">
+
+
+<meta property="og:title" content="Bolt源码分析（一）--数据结构解读" />
+<meta property="og:description" content="分析记录bolt数据库" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://www.ipeapea.cn/post/bolt_reading/" /><meta property="article:section" content="post" />
+<meta property="article:published_time" content="2021-04-28T23:45:39&#43;08:00" />
+<meta property="article:modified_time" content="2021-04-28T23:45:39&#43;08:00" />
+
+<meta itemprop="name" content="Bolt源码分析（一）--数据结构解读">
+<meta itemprop="description" content="分析记录bolt数据库"><meta itemprop="datePublished" content="2021-04-28T23:45:39&#43;08:00" />
+<meta itemprop="dateModified" content="2021-04-28T23:45:39&#43;08:00" />
+<meta itemprop="wordCount" content="2088">
+<meta itemprop="keywords" content="go,bolt," /><meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Bolt源码分析（一）--数据结构解读"/>
+<meta name="twitter:description" content="分析记录bolt数据库"/>
+
+<!--[if lte IE 9]>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js"></script>
+<![endif]-->
+
+<!--[if lt IE 9]>
+  <script src="https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js"></script>
+<![endif]-->
+
+</head>
+<body>
+  <div id="mobile-navbar" class="mobile-navbar">
+  <div class="mobile-header-logo">
+    <a href="/" class="logo">静心台</a>
+  </div>
+  <div class="mobile-navbar-icon">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+</div>
+<nav id="mobile-menu" class="mobile-menu slideout-menu">
+  <ul class="mobile-menu-list">
+    <a href="/">
+        <li class="mobile-menu-item">Home</li>
+      </a><a href="/post/">
+        <li class="mobile-menu-item">Archives</li>
+      </a><a href="/live/">
+        <li class="mobile-menu-item">Life</li>
+      </a><a href="/tags/">
+        <li class="mobile-menu-item">Tags</li>
+      </a><a href="/about/">
+        <li class="mobile-menu-item">About</li>
+      </a>
+  </ul>
+
+  
+
+
+</nav>
+
+  <div class="container" id="mobile-panel">
+    <header id="header" class="header">
+        <div class="logo-wrapper">
+  <a href="/" class="logo">静心台</a>
+</div>
+
+
+
+
+
+<nav class="site-navbar">
+  <ul id="menu" class="menu">
+    <li class="menu-item">
+        <a class="menu-item-link" href="/">Home</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/post/">Archives</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/live/">Life</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/tags/">Tags</a>
+      </li><li class="menu-item">
+        <a class="menu-item-link" href="/about/">About</a>
+      </li>
+  </ul>
+</nav>
+
+    </header>
+
+    <main id="main" class="main">
+      <div class="content-wrapper">
+        <div id="content" class="content">
+          <article class="post">
+    
+    <header class="post-header">
+      <h1 class="post-title">Bolt源码分析（一）--数据结构解读</h1>
+
+      <div class="post-meta">
+        <span class="post-time"> 2021-04-28 </span>
+        
+          <span class="more-meta"> 约 2088 字 </span>
+          <span class="more-meta"> 预计阅读 5 分钟 </span>
+        <span id="busuanzi_container_page_pv" class="more-meta"> <span id="busuanzi_value_page_pv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> 次阅读 </span>
+      </div>
+    </header>
+
+    <div class="post-toc" id="post-toc">
+  <h2 class="post-toc-title">文章目录</h2>
+  <div class="post-toc-content always-active">
+    <nav id="TableOfContents">
+  <ul>
+    <li><a href="#主要数据结构">主要数据结构</a>
+      <ul>
+        <li><a href="#page数据结构">page数据结构</a></li>
+        <li><a href="#meta-元数据信息结构体"><code>meta</code> 元数据信息结构体</a></li>
+        <li><a href="#分支页">分支页</a></li>
+        <li><a href="#叶子节点">叶子节点</a></li>
+        <li><a href="#空闲列表">空闲列表</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+  </div>
+</div>
+    <div class="post-content">
+      <p>本文作为bolt的入门篇，介绍几个bolt的基本数据结构</p>
+<p>环境信息</p>
+<blockquote>
+<p>OS: mac
+MEM: 16G</p>
+</blockquote>
+<h2 id="主要数据结构">主要数据结构</h2>
+<h3 id="page数据结构">page数据结构</h3>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">const</span> <span class="p">(</span>
+	<span class="nx">branchPageFlag</span>   <span class="p">=</span> <span class="mh">0x01</span> <span class="c1">//分支节点页类型
+</span><span class="c1"></span>	<span class="nx">leafPageFlag</span>     <span class="p">=</span> <span class="mh">0x02</span> <span class="c1">//叶子节点页类型
+</span><span class="c1"></span>	<span class="nx">metaPageFlag</span>     <span class="p">=</span> <span class="mh">0x04</span> <span class="c1">//元数据页类型
+</span><span class="c1"></span>	<span class="nx">freelistPageFlag</span> <span class="p">=</span> <span class="mh">0x10</span> <span class="c1">//空闲列表页类型
+</span><span class="c1"></span><span class="p">)</span>
+
+<span class="kd">type</span> <span class="nx">page</span> <span class="kd">struct</span> <span class="p">{</span>
+	<span class="nx">id</span>       <span class="kt">uint64</span>   <span class="c1">//页编号ID
+</span><span class="c1"></span>	<span class="nx">flags</span>    <span class="kt">uint16</span>   <span class="c1">//页类型
+</span><span class="c1"></span>	<span class="nx">count</span>    <span class="kt">uint16</span>   <span class="c1">//不同类型不同含义
+</span><span class="c1"></span>	<span class="nx">overflow</span> <span class="kt">uint32</span>   <span class="c1">//是否跨页
+</span><span class="c1"></span>	<span class="nx">ptr</span>      <span class="kt">uintptr</span>  <span class="c1">//作用类似于C语言中的Void*,用于不同page的数据转换
+</span><span class="c1"></span><span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><p><code>page</code>表示在存储设备中的页数据，头16个字节含有页ID、页类型等信息，判断页类型的方法如下</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-go" data-lang="go"><span class="c1">// typ returns a human readable page type string used for debugging.
+</span><span class="c1"></span><span class="kd">func</span> <span class="p">(</span><span class="nx">p</span> <span class="o">*</span><span class="nx">page</span><span class="p">)</span> <span class="nf">typ</span><span class="p">()</span> <span class="kt">string</span> <span class="p">{</span>
+	<span class="k">if</span> <span class="p">(</span><span class="nx">p</span><span class="p">.</span><span class="nx">flags</span> <span class="o">&amp;</span> <span class="nx">branchPageFlag</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span> <span class="p">{</span>
+		<span class="k">return</span> <span class="s">&#34;branch&#34;</span>
+	<span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="nx">p</span><span class="p">.</span><span class="nx">flags</span> <span class="o">&amp;</span> <span class="nx">leafPageFlag</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span> <span class="p">{</span>
+		<span class="k">return</span> <span class="s">&#34;leaf&#34;</span>
+	<span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="nx">p</span><span class="p">.</span><span class="nx">flags</span> <span class="o">&amp;</span> <span class="nx">metaPageFlag</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span> <span class="p">{</span>
+		<span class="k">return</span> <span class="s">&#34;meta&#34;</span>
+	<span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="nx">p</span><span class="p">.</span><span class="nx">flags</span> <span class="o">&amp;</span> <span class="nx">freelistPageFlag</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span> <span class="p">{</span>
+		<span class="k">return</span> <span class="s">&#34;freelist&#34;</span>
+	<span class="p">}</span>
+	<span class="k">return</span> <span class="nx">fmt</span><span class="p">.</span><span class="nf">Sprintf</span><span class="p">(</span><span class="s">&#34;unknown&lt;%02x&gt;&#34;</span><span class="p">,</span> <span class="nx">p</span><span class="p">.</span><span class="nx">flags</span><span class="p">)</span>
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><p><code>page</code>header对应布局
+<img src="/images/bolt/page_header.png" alt="page_header">
+将<code>page</code>转换为<code>meta</code>类型</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-go" data-lang="go"><span class="c1">// meta returns a pointer to the metadata section of the page.
+</span><span class="c1"></span><span class="kd">func</span> <span class="p">(</span><span class="nx">p</span> <span class="o">*</span><span class="nx">page</span><span class="p">)</span> <span class="nf">meta</span><span class="p">()</span> <span class="o">*</span><span class="nx">meta</span> <span class="p">{</span>
+	<span class="k">return</span> <span class="p">(</span><span class="o">*</span><span class="nx">meta</span><span class="p">)(</span><span class="nx">unsafe</span><span class="p">.</span><span class="nf">Pointer</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">p</span><span class="p">.</span><span class="nx">ptr</span><span class="p">))</span>
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><h3 id="meta-元数据信息结构体"><code>meta</code> 元数据信息结构体</h3>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">type</span> <span class="nx">pgid</span> <span class="kt">uint64</span>
+
+<span class="kd">type</span> <span class="nx">meta</span> <span class="kd">struct</span> <span class="p">{</span>
+	<span class="nx">magic</span>    <span class="kt">uint32</span> <span class="c1">//固定魔数，0xED0CDAED
+</span><span class="c1"></span>  <span class="nx">version</span>  <span class="kt">uint32</span> <span class="c1">//固定版本号，2
+</span><span class="c1"></span>	<span class="nx">pageSize</span> <span class="kt">uint32</span> <span class="c1">//page页的大小，该值和操作系统默认的页大小保持一致
+</span><span class="c1"></span>	<span class="nx">flags</span>    <span class="kt">uint32</span> <span class="c1">//保留值，目前貌似还没用到
+</span><span class="c1"></span>	<span class="nx">root</span>     <span class="nx">bucket</span> <span class="c1">//bolt中的存储概念，一个文件对应一个数据库，bucket对应一个存储分区
+</span><span class="c1"></span>	<span class="nx">freelist</span> <span class="nx">pgid</span>   <span class="c1">//空闲列表页的id
+</span><span class="c1"></span>	<span class="nx">pgid</span>     <span class="nx">pgid</span>   <span class="c1">//元数据页ID
+</span><span class="c1"></span>	<span class="nx">txid</span>     <span class="nx">txid</span>   <span class="c1">//最大事务ID
+</span><span class="c1"></span>	<span class="nx">checksum</span> <span class="kt">uint64</span> <span class="c1">//校验和
+</span><span class="c1"></span><span class="p">}</span>
+
+<span class="kd">type</span> <span class="nx">bucket</span> <span class="kd">struct</span> <span class="p">{</span>
+	<span class="nx">root</span>     <span class="nx">pgid</span>   <span class="c1">// page id of the bucket&#39;s root-level page
+</span><span class="c1"></span>	<span class="nx">sequence</span> <span class="kt">uint64</span> <span class="c1">// monotonically incrementing, used by NextSequence()
+</span><span class="c1"></span><span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><p><code>unsafe.Sizeof(meta{})</code>值为64个字节，而一个页是4K，重点看一下<code>meta</code>是怎么写入<code>page</code>的</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-go" data-lang="go"><span class="c1">// write writes the meta onto a page.
+</span><span class="c1"></span><span class="kd">func</span> <span class="p">(</span><span class="nx">m</span> <span class="o">*</span><span class="nx">meta</span><span class="p">)</span> <span class="nf">write</span><span class="p">(</span><span class="nx">p</span> <span class="o">*</span><span class="nx">page</span><span class="p">)</span> <span class="p">{</span>
+	<span class="k">if</span> <span class="nx">m</span><span class="p">.</span><span class="nx">root</span><span class="p">.</span><span class="nx">root</span> <span class="o">&gt;=</span> <span class="nx">m</span><span class="p">.</span><span class="nx">pgid</span> <span class="p">{</span>
+		<span class="nb">panic</span><span class="p">(</span><span class="nx">fmt</span><span class="p">.</span><span class="nf">Sprintf</span><span class="p">(</span><span class="s">&#34;root bucket pgid (%d) above high water mark (%d)&#34;</span><span class="p">,</span> <span class="nx">m</span><span class="p">.</span><span class="nx">root</span><span class="p">.</span><span class="nx">root</span><span class="p">,</span> <span class="nx">m</span><span class="p">.</span><span class="nx">pgid</span><span class="p">))</span>
+	<span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="nx">m</span><span class="p">.</span><span class="nx">freelist</span> <span class="o">&gt;=</span> <span class="nx">m</span><span class="p">.</span><span class="nx">pgid</span> <span class="p">{</span>
+		<span class="nb">panic</span><span class="p">(</span><span class="nx">fmt</span><span class="p">.</span><span class="nf">Sprintf</span><span class="p">(</span><span class="s">&#34;freelist pgid (%d) above high water mark (%d)&#34;</span><span class="p">,</span> <span class="nx">m</span><span class="p">.</span><span class="nx">freelist</span><span class="p">,</span> <span class="nx">m</span><span class="p">.</span><span class="nx">pgid</span><span class="p">))</span>
+	<span class="p">}</span>
+
+	<span class="c1">// Page id is either going to be 0 or 1 which we can determine by the transaction ID.
+</span><span class="c1"></span>	<span class="nx">p</span><span class="p">.</span><span class="nx">id</span> <span class="p">=</span> <span class="nf">pgid</span><span class="p">(</span><span class="nx">m</span><span class="p">.</span><span class="nx">txid</span> <span class="o">%</span> <span class="mi">2</span><span class="p">)</span>
+	<span class="nx">p</span><span class="p">.</span><span class="nx">flags</span> <span class="o">|=</span> <span class="nx">metaPageFlag</span>
+
+	<span class="c1">// Calculate the checksum.
+</span><span class="c1"></span>	<span class="nx">m</span><span class="p">.</span><span class="nx">checksum</span> <span class="p">=</span> <span class="nx">m</span><span class="p">.</span><span class="nf">sum64</span><span class="p">()</span>
+
+	<span class="nx">m</span><span class="p">.</span><span class="nb">copy</span><span class="p">(</span><span class="nx">p</span><span class="p">.</span><span class="nf">meta</span><span class="p">())</span> <span class="c1">//此处仅仅只是将meta开头的64个字节拷贝到了p.ptr开始的64个字节处
+</span><span class="c1"></span><span class="p">}</span>
+
+<span class="c1">// generates the checksum for the meta.
+</span><span class="c1"></span><span class="kd">func</span> <span class="p">(</span><span class="nx">m</span> <span class="o">*</span><span class="nx">meta</span><span class="p">)</span> <span class="nf">sum64</span><span class="p">()</span> <span class="kt">uint64</span> <span class="p">{</span>
+	<span class="kd">var</span> <span class="nx">h</span> <span class="p">=</span> <span class="nx">fnv</span><span class="p">.</span><span class="nf">New64a</span><span class="p">()</span>
+	<span class="nx">_</span><span class="p">,</span> <span class="nx">_</span> <span class="p">=</span> <span class="nx">h</span><span class="p">.</span><span class="nf">Write</span><span class="p">((</span><span class="o">*</span><span class="p">[</span><span class="nx">unsafe</span><span class="p">.</span><span class="nf">Offsetof</span><span class="p">(</span><span class="nx">meta</span><span class="p">{}.</span><span class="nx">checksum</span><span class="p">)]</span><span class="kt">byte</span><span class="p">)(</span><span class="nx">unsafe</span><span class="p">.</span><span class="nf">Pointer</span><span class="p">(</span><span class="nx">m</span><span class="p">))[:])</span> <span class="c1">// 实际计算从m地址开始的56个字节hash值
+</span><span class="c1"></span>	<span class="k">return</span> <span class="nx">h</span><span class="p">.</span><span class="nf">Sum64</span><span class="p">()</span>
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><h3 id="分支页">分支页</h3>
+<p>分支页的定义</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-go" data-lang="go"><span class="c1">// branchPageElement represents a node on a branch page.
+</span><span class="c1"></span><span class="kd">type</span> <span class="nx">branchPageElement</span> <span class="kd">struct</span> <span class="p">{</span>
+	<span class="nx">pos</span>   <span class="kt">uint32</span>
+	<span class="nx">ksize</span> <span class="kt">uint32</span>
+	<span class="nx">pgid</span>  <span class="nx">pgid</span>
+<span class="p">}</span>
+
+<span class="c1">// 从page中获取第index个分支页数据
+</span><span class="c1"></span><span class="kd">func</span> <span class="p">(</span><span class="nx">p</span> <span class="o">*</span><span class="nx">page</span><span class="p">)</span> <span class="nf">branchPageElement</span><span class="p">(</span><span class="nx">index</span> <span class="kt">uint16</span><span class="p">)</span> <span class="o">*</span><span class="nx">branchPageElement</span> <span class="p">{</span>
+	<span class="k">return</span> <span class="o">&amp;</span><span class="p">((</span><span class="o">*</span><span class="p">[</span><span class="mh">0x7FFFFFF</span><span class="p">]</span><span class="nx">branchPageElement</span><span class="p">)(</span><span class="nx">unsafe</span><span class="p">.</span><span class="nf">Pointer</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">p</span><span class="p">.</span><span class="nx">ptr</span><span class="p">)))[</span><span class="nx">index</span><span class="p">]</span>
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>也就是说分支页实际是由N个<code>branchPageElement</code>组成的，一个<code>branchPageElement</code>占用16个字节，那么一个页一共可以有（4k-16)/16=255<br>
+其内存结构
+<img src="/images/bolt/branch_page.png" alt=""></p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-go" data-lang="go"><span class="c1">// key returns a byte slice of the node key.
+</span><span class="c1"></span><span class="kd">func</span> <span class="p">(</span><span class="nx">n</span> <span class="o">*</span><span class="nx">branchPageElement</span><span class="p">)</span> <span class="nf">key</span><span class="p">()</span> <span class="p">[]</span><span class="kt">byte</span> <span class="p">{</span>
+	<span class="nx">buf</span> <span class="o">:=</span> <span class="p">(</span><span class="o">*</span><span class="p">[</span><span class="nx">maxAllocSize</span><span class="p">]</span><span class="kt">byte</span><span class="p">)(</span><span class="nx">unsafe</span><span class="p">.</span><span class="nf">Pointer</span><span class="p">(</span><span class="nx">n</span><span class="p">))</span>
+	<span class="k">return</span> <span class="p">(</span><span class="o">*</span><span class="p">[</span><span class="nx">maxAllocSize</span><span class="p">]</span><span class="kt">byte</span><span class="p">)(</span><span class="nx">unsafe</span><span class="p">.</span><span class="nf">Pointer</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">buf</span><span class="p">[</span><span class="nx">n</span><span class="p">.</span><span class="nx">pos</span><span class="p">]))[:</span><span class="nx">n</span><span class="p">.</span><span class="nx">ksize</span><span class="p">]</span>
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><p><code>branchPageElement</code>记录的信息为一个key值，该key在这个元素位置偏移量为<code>n.pos</code>位置处，且len为<code>n.ksize</code></p>
+<h3 id="叶子节点">叶子节点</h3>
+<p><code>leafPageElement</code>基本和<code>branchPageElement</code>一致，内存结构图
+其内存结构
+<img src="/images/bolt/leaf_page.png" alt=""></p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-go" data-lang="go"><span class="c1">// leafPageElement represents a node on a leaf page.
+</span><span class="c1"></span><span class="kd">type</span> <span class="nx">leafPageElement</span> <span class="kd">struct</span> <span class="p">{</span>
+	<span class="nx">flags</span> <span class="kt">uint32</span>
+	<span class="nx">pos</span>   <span class="kt">uint32</span>
+	<span class="nx">ksize</span> <span class="kt">uint32</span>
+	<span class="nx">vsize</span> <span class="kt">uint32</span>
+<span class="p">}</span>
+
+<span class="c1">// leafPageElement retrieves the leaf node by index
+</span><span class="c1"></span><span class="kd">func</span> <span class="p">(</span><span class="nx">p</span> <span class="o">*</span><span class="nx">page</span><span class="p">)</span> <span class="nf">leafPageElement</span><span class="p">(</span><span class="nx">index</span> <span class="kt">uint16</span><span class="p">)</span> <span class="o">*</span><span class="nx">leafPageElement</span> <span class="p">{</span>
+	<span class="nx">n</span> <span class="o">:=</span> <span class="o">&amp;</span><span class="p">((</span><span class="o">*</span><span class="p">[</span><span class="mh">0x7FFFFFF</span><span class="p">]</span><span class="nx">leafPageElement</span><span class="p">)(</span><span class="nx">unsafe</span><span class="p">.</span><span class="nf">Pointer</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">p</span><span class="p">.</span><span class="nx">ptr</span><span class="p">)))[</span><span class="nx">index</span><span class="p">]</span>
+	<span class="k">return</span> <span class="nx">n</span>
+<span class="p">}</span>
+
+<span class="c1">// leafPageElements retrieves a list of leaf nodes.
+</span><span class="c1"></span><span class="kd">func</span> <span class="p">(</span><span class="nx">p</span> <span class="o">*</span><span class="nx">page</span><span class="p">)</span> <span class="nf">leafPageElements</span><span class="p">()</span> <span class="p">[]</span><span class="nx">leafPageElement</span> <span class="p">{</span>
+	<span class="k">if</span> <span class="nx">p</span><span class="p">.</span><span class="nx">count</span> <span class="o">==</span> <span class="mi">0</span> <span class="p">{</span>
+		<span class="k">return</span> <span class="kc">nil</span>
+	<span class="p">}</span>
+	<span class="k">return</span> <span class="p">((</span><span class="o">*</span><span class="p">[</span><span class="mh">0x7FFFFFF</span><span class="p">]</span><span class="nx">leafPageElement</span><span class="p">)(</span><span class="nx">unsafe</span><span class="p">.</span><span class="nf">Pointer</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">p</span><span class="p">.</span><span class="nx">ptr</span><span class="p">)))[:]</span>
+<span class="p">}</span>
+
+<span class="c1">// key returns a byte slice of the node key.
+</span><span class="c1"></span><span class="kd">func</span> <span class="p">(</span><span class="nx">n</span> <span class="o">*</span><span class="nx">leafPageElement</span><span class="p">)</span> <span class="nf">key</span><span class="p">()</span> <span class="p">[]</span><span class="kt">byte</span> <span class="p">{</span>
+	<span class="nx">buf</span> <span class="o">:=</span> <span class="p">(</span><span class="o">*</span><span class="p">[</span><span class="nx">maxAllocSize</span><span class="p">]</span><span class="kt">byte</span><span class="p">)(</span><span class="nx">unsafe</span><span class="p">.</span><span class="nf">Pointer</span><span class="p">(</span><span class="nx">n</span><span class="p">))</span>
+	<span class="k">return</span> <span class="p">(</span><span class="o">*</span><span class="p">[</span><span class="nx">maxAllocSize</span><span class="p">]</span><span class="kt">byte</span><span class="p">)(</span><span class="nx">unsafe</span><span class="p">.</span><span class="nf">Pointer</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">buf</span><span class="p">[</span><span class="nx">n</span><span class="p">.</span><span class="nx">pos</span><span class="p">]))[:</span><span class="nx">n</span><span class="p">.</span><span class="nx">ksize</span><span class="p">:</span><span class="nx">n</span><span class="p">.</span><span class="nx">ksize</span><span class="p">]</span>
+<span class="p">}</span>
+
+<span class="c1">// value returns a byte slice of the node value.
+</span><span class="c1"></span><span class="kd">func</span> <span class="p">(</span><span class="nx">n</span> <span class="o">*</span><span class="nx">leafPageElement</span><span class="p">)</span> <span class="nf">value</span><span class="p">()</span> <span class="p">[]</span><span class="kt">byte</span> <span class="p">{</span>
+	<span class="nx">buf</span> <span class="o">:=</span> <span class="p">(</span><span class="o">*</span><span class="p">[</span><span class="nx">maxAllocSize</span><span class="p">]</span><span class="kt">byte</span><span class="p">)(</span><span class="nx">unsafe</span><span class="p">.</span><span class="nf">Pointer</span><span class="p">(</span><span class="nx">n</span><span class="p">))</span>
+	<span class="k">return</span> <span class="p">(</span><span class="o">*</span><span class="p">[</span><span class="nx">maxAllocSize</span><span class="p">]</span><span class="kt">byte</span><span class="p">)(</span><span class="nx">unsafe</span><span class="p">.</span><span class="nf">Pointer</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">buf</span><span class="p">[</span><span class="nx">n</span><span class="p">.</span><span class="nx">pos</span><span class="o">+</span><span class="nx">n</span><span class="p">.</span><span class="nx">ksize</span><span class="p">]))[:</span><span class="nx">n</span><span class="p">.</span><span class="nx">vsize</span><span class="p">:</span><span class="nx">n</span><span class="p">.</span><span class="nx">vsize</span><span class="p">]</span>
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><h3 id="空闲列表">空闲列表</h3>
+<p><code>freelist</code>结构体定义</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-go" data-lang="go"><span class="kd">type</span> <span class="nx">freelist</span> <span class="kd">struct</span> <span class="p">{</span>
+	<span class="nx">ids</span>     <span class="p">[]</span><span class="nx">pgid</span>          <span class="c1">// all free and available free page ids.
+</span><span class="c1"></span>	<span class="nx">pending</span> <span class="kd">map</span><span class="p">[</span><span class="nx">txid</span><span class="p">][]</span><span class="nx">pgid</span> <span class="c1">// mapping of soon-to-be free page ids by tx.
+</span><span class="c1"></span>	<span class="nx">cache</span>   <span class="kd">map</span><span class="p">[</span><span class="nx">pgid</span><span class="p">]</span><span class="kt">bool</span>   <span class="c1">// fast lookup of all free and pending page ids.
+</span><span class="c1"></span><span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><p><code>free_list</code>内存结构图
+<img src="/images/bolt/free_list.png" alt="">
+从page中读取空闲列表</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code><span class="lnt">  1
+</span><span class="lnt">  2
+</span><span class="lnt">  3
+</span><span class="lnt">  4
+</span><span class="lnt">  5
+</span><span class="lnt">  6
+</span><span class="lnt">  7
+</span><span class="lnt">  8
+</span><span class="lnt">  9
+</span><span class="lnt"> 10
+</span><span class="lnt"> 11
+</span><span class="lnt"> 12
+</span><span class="lnt"> 13
+</span><span class="lnt"> 14
+</span><span class="lnt"> 15
+</span><span class="lnt"> 16
+</span><span class="lnt"> 17
+</span><span class="lnt"> 18
+</span><span class="lnt"> 19
+</span><span class="lnt"> 20
+</span><span class="lnt"> 21
+</span><span class="lnt"> 22
+</span><span class="lnt"> 23
+</span><span class="lnt"> 24
+</span><span class="lnt"> 25
+</span><span class="lnt"> 26
+</span><span class="lnt"> 27
+</span><span class="lnt"> 28
+</span><span class="lnt"> 29
+</span><span class="lnt"> 30
+</span><span class="lnt"> 31
+</span><span class="lnt"> 32
+</span><span class="lnt"> 33
+</span><span class="lnt"> 34
+</span><span class="lnt"> 35
+</span><span class="lnt"> 36
+</span><span class="lnt"> 37
+</span><span class="lnt"> 38
+</span><span class="lnt"> 39
+</span><span class="lnt"> 40
+</span><span class="lnt"> 41
+</span><span class="lnt"> 42
+</span><span class="lnt"> 43
+</span><span class="lnt"> 44
+</span><span class="lnt"> 45
+</span><span class="lnt"> 46
+</span><span class="lnt"> 47
+</span><span class="lnt"> 48
+</span><span class="lnt"> 49
+</span><span class="lnt"> 50
+</span><span class="lnt"> 51
+</span><span class="lnt"> 52
+</span><span class="lnt"> 53
+</span><span class="lnt"> 54
+</span><span class="lnt"> 55
+</span><span class="lnt"> 56
+</span><span class="lnt"> 57
+</span><span class="lnt"> 58
+</span><span class="lnt"> 59
+</span><span class="lnt"> 60
+</span><span class="lnt"> 61
+</span><span class="lnt"> 62
+</span><span class="lnt"> 63
+</span><span class="lnt"> 64
+</span><span class="lnt"> 65
+</span><span class="lnt"> 66
+</span><span class="lnt"> 67
+</span><span class="lnt"> 68
+</span><span class="lnt"> 69
+</span><span class="lnt"> 70
+</span><span class="lnt"> 71
+</span><span class="lnt"> 72
+</span><span class="lnt"> 73
+</span><span class="lnt"> 74
+</span><span class="lnt"> 75
+</span><span class="lnt"> 76
+</span><span class="lnt"> 77
+</span><span class="lnt"> 78
+</span><span class="lnt"> 79
+</span><span class="lnt"> 80
+</span><span class="lnt"> 81
+</span><span class="lnt"> 82
+</span><span class="lnt"> 83
+</span><span class="lnt"> 84
+</span><span class="lnt"> 85
+</span><span class="lnt"> 86
+</span><span class="lnt"> 87
+</span><span class="lnt"> 88
+</span><span class="lnt"> 89
+</span><span class="lnt"> 90
+</span><span class="lnt"> 91
+</span><span class="lnt"> 92
+</span><span class="lnt"> 93
+</span><span class="lnt"> 94
+</span><span class="lnt"> 95
+</span><span class="lnt"> 96
+</span><span class="lnt"> 97
+</span><span class="lnt"> 98
+</span><span class="lnt"> 99
+</span><span class="lnt">100
+</span><span class="lnt">101
+</span><span class="lnt">102
+</span><span class="lnt">103
+</span><span class="lnt">104
+</span><span class="lnt">105
+</span><span class="lnt">106
+</span><span class="lnt">107
+</span><span class="lnt">108
+</span><span class="lnt">109
+</span><span class="lnt">110
+</span><span class="lnt">111
+</span><span class="lnt">112
+</span><span class="lnt">113
+</span><span class="lnt">114
+</span><span class="lnt">115
+</span><span class="lnt">116
+</span><span class="lnt">117
+</span><span class="lnt">118
+</span><span class="lnt">119
+</span><span class="lnt">120
+</span><span class="lnt">121
+</span><span class="lnt">122
+</span><span class="lnt">123
+</span><span class="lnt">124
+</span><span class="lnt">125
+</span><span class="lnt">126
+</span><span class="lnt">127
+</span><span class="lnt">128
+</span><span class="lnt">129
+</span><span class="lnt">130
+</span><span class="lnt">131
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-go" data-lang="go"><span class="c1">// read initializes the freelist from a freelist page.
+</span><span class="c1"></span><span class="kd">func</span> <span class="p">(</span><span class="nx">f</span> <span class="o">*</span><span class="nx">freelist</span><span class="p">)</span> <span class="nf">read</span><span class="p">(</span><span class="nx">p</span> <span class="o">*</span><span class="nx">page</span><span class="p">)</span> <span class="p">{</span>
+	<span class="c1">// If the page.count is at the max uint16 value (64k) then it&#39;s considered
+</span><span class="c1"></span>	<span class="c1">// an overflow and the size of the freelist is stored as the first element.
+</span><span class="c1"></span>	<span class="nx">idx</span><span class="p">,</span> <span class="nx">count</span> <span class="o">:=</span> <span class="mi">0</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="nx">p</span><span class="p">.</span><span class="nx">count</span><span class="p">)</span>
+	<span class="k">if</span> <span class="nx">count</span> <span class="o">==</span> <span class="mh">0xFFFF</span> <span class="p">{</span>
+		<span class="nx">idx</span> <span class="p">=</span> <span class="mi">1</span>
+		<span class="nx">count</span> <span class="p">=</span> <span class="nb">int</span><span class="p">(((</span><span class="o">*</span><span class="p">[</span><span class="nx">maxAllocSize</span><span class="p">]</span><span class="nx">pgid</span><span class="p">)(</span><span class="nx">unsafe</span><span class="p">.</span><span class="nf">Pointer</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">p</span><span class="p">.</span><span class="nx">ptr</span><span class="p">)))[</span><span class="mi">0</span><span class="p">])</span>
+	<span class="p">}</span>
+
+	<span class="c1">// Copy the list of page ids from the freelist.
+</span><span class="c1"></span>	<span class="k">if</span> <span class="nx">count</span> <span class="o">==</span> <span class="mi">0</span> <span class="p">{</span>
+		<span class="nx">f</span><span class="p">.</span><span class="nx">ids</span> <span class="p">=</span> <span class="kc">nil</span>
+	<span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+		<span class="nx">ids</span> <span class="o">:=</span> <span class="p">((</span><span class="o">*</span><span class="p">[</span><span class="nx">maxAllocSize</span><span class="p">]</span><span class="nx">pgid</span><span class="p">)(</span><span class="nx">unsafe</span><span class="p">.</span><span class="nf">Pointer</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">p</span><span class="p">.</span><span class="nx">ptr</span><span class="p">)))[</span><span class="nx">idx</span><span class="p">:</span><span class="nx">count</span><span class="p">]</span>
+		<span class="nx">f</span><span class="p">.</span><span class="nx">ids</span> <span class="p">=</span> <span class="nb">make</span><span class="p">([]</span><span class="nx">pgid</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="nx">ids</span><span class="p">))</span>
+		<span class="nb">copy</span><span class="p">(</span><span class="nx">f</span><span class="p">.</span><span class="nx">ids</span><span class="p">,</span> <span class="nx">ids</span><span class="p">)</span>
+
+		<span class="c1">// Make sure they&#39;re sorted.
+</span><span class="c1"></span>		<span class="nx">sort</span><span class="p">.</span><span class="nf">Sort</span><span class="p">(</span><span class="nf">pgids</span><span class="p">(</span><span class="nx">f</span><span class="p">.</span><span class="nx">ids</span><span class="p">))</span>
+	<span class="p">}</span>
+
+	<span class="c1">// Rebuild the page cache.
+</span><span class="c1"></span>  <span class="nx">f</span><span class="p">.</span><span class="nf">reindex</span><span class="p">()</span>
+<span class="p">}</span>
+
+<span class="c1">// reindex rebuilds the free cache based on available and pending free lists.
+</span><span class="c1">// read initializes the freelist from a freelist page.
+</span><span class="c1"></span><span class="kd">func</span> <span class="p">(</span><span class="nx">f</span> <span class="o">*</span><span class="nx">freelist</span><span class="p">)</span> <span class="nf">read</span><span class="p">(</span><span class="nx">p</span> <span class="o">*</span><span class="nx">page</span><span class="p">)</span> <span class="p">{</span>
+	<span class="c1">// If the page.count is at the max uint16 value (64k) then it&#39;s considered
+</span><span class="c1"></span>	<span class="c1">// an overflow and the size of the freelist is stored as the first element.
+</span><span class="c1"></span>	<span class="nx">idx</span><span class="p">,</span> <span class="nx">count</span> <span class="o">:=</span> <span class="mi">0</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="nx">p</span><span class="p">.</span><span class="nx">count</span><span class="p">)</span>
+	<span class="k">if</span> <span class="nx">count</span> <span class="o">==</span> <span class="mh">0xFFFF</span> <span class="p">{</span>
+		<span class="nx">idx</span> <span class="p">=</span> <span class="mi">1</span>
+		<span class="nx">count</span> <span class="p">=</span> <span class="nb">int</span><span class="p">(((</span><span class="o">*</span><span class="p">[</span><span class="nx">maxAllocSize</span><span class="p">]</span><span class="nx">pgid</span><span class="p">)(</span><span class="nx">unsafe</span><span class="p">.</span><span class="nf">Pointer</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">p</span><span class="p">.</span><span class="nx">ptr</span><span class="p">)))[</span><span class="mi">0</span><span class="p">])</span>
+	<span class="p">}</span>
+
+	<span class="c1">// Copy the list of page ids from the freelist.
+</span><span class="c1"></span>	<span class="k">if</span> <span class="nx">count</span> <span class="o">==</span> <span class="mi">0</span> <span class="p">{</span>
+		<span class="nx">f</span><span class="p">.</span><span class="nx">ids</span> <span class="p">=</span> <span class="kc">nil</span>
+	<span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+		<span class="nx">ids</span> <span class="o">:=</span> <span class="p">((</span><span class="o">*</span><span class="p">[</span><span class="nx">maxAllocSize</span><span class="p">]</span><span class="nx">pgid</span><span class="p">)(</span><span class="nx">unsafe</span><span class="p">.</span><span class="nf">Pointer</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">p</span><span class="p">.</span><span class="nx">ptr</span><span class="p">)))[</span><span class="nx">idx</span><span class="p">:</span><span class="nx">count</span><span class="p">]</span>
+		<span class="nx">f</span><span class="p">.</span><span class="nx">ids</span> <span class="p">=</span> <span class="nb">make</span><span class="p">([]</span><span class="nx">pgid</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="nx">ids</span><span class="p">))</span>
+		<span class="nb">copy</span><span class="p">(</span><span class="nx">f</span><span class="p">.</span><span class="nx">ids</span><span class="p">,</span> <span class="nx">ids</span><span class="p">)</span>
+
+		<span class="c1">// Make sure they&#39;re sorted.
+</span><span class="c1"></span>		<span class="nx">sort</span><span class="p">.</span><span class="nf">Sort</span><span class="p">(</span><span class="nf">pgids</span><span class="p">(</span><span class="nx">f</span><span class="p">.</span><span class="nx">ids</span><span class="p">))</span>
+	<span class="p">}</span>
+
+	<span class="c1">// Rebuild the page cache.
+</span><span class="c1"></span>	<span class="nx">f</span><span class="p">.</span><span class="nf">reindex</span><span class="p">()</span>
+<span class="p">}</span>
+
+<span class="c1">// write writes the page ids onto a freelist page. All free and pending ids are
+</span><span class="c1">// saved to disk since in the event of a program crash, all pending ids will
+</span><span class="c1">// become free.
+</span><span class="c1"></span><span class="kd">func</span> <span class="p">(</span><span class="nx">f</span> <span class="o">*</span><span class="nx">freelist</span><span class="p">)</span> <span class="nf">write</span><span class="p">(</span><span class="nx">p</span> <span class="o">*</span><span class="nx">page</span><span class="p">)</span> <span class="kt">error</span> <span class="p">{</span>
+	<span class="c1">// Combine the old free pgids and pgids waiting on an open transaction.
+</span><span class="c1"></span>
+	<span class="c1">// Update the header flag.
+</span><span class="c1"></span>	<span class="nx">p</span><span class="p">.</span><span class="nx">flags</span> <span class="o">|=</span> <span class="nx">freelistPageFlag</span>
+
+	<span class="c1">// The page.count can only hold up to 64k elements so if we overflow that
+</span><span class="c1"></span>	<span class="c1">// number then we handle it by putting the size in the first element.
+</span><span class="c1"></span>	<span class="nx">lenids</span> <span class="o">:=</span> <span class="nx">f</span><span class="p">.</span><span class="nf">count</span><span class="p">()</span>
+	<span class="k">if</span> <span class="nx">lenids</span> <span class="o">==</span> <span class="mi">0</span> <span class="p">{</span>
+		<span class="nx">p</span><span class="p">.</span><span class="nx">count</span> <span class="p">=</span> <span class="nb">uint16</span><span class="p">(</span><span class="nx">lenids</span><span class="p">)</span>
+	<span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="nx">lenids</span> <span class="p">&lt;</span> <span class="mh">0xFFFF</span> <span class="p">{</span>
+		<span class="nx">p</span><span class="p">.</span><span class="nx">count</span> <span class="p">=</span> <span class="nb">uint16</span><span class="p">(</span><span class="nx">lenids</span><span class="p">)</span>
+		<span class="nx">f</span><span class="p">.</span><span class="nf">copyall</span><span class="p">(((</span><span class="o">*</span><span class="p">[</span><span class="nx">maxAllocSize</span><span class="p">]</span><span class="nx">pgid</span><span class="p">)(</span><span class="nx">unsafe</span><span class="p">.</span><span class="nf">Pointer</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">p</span><span class="p">.</span><span class="nx">ptr</span><span class="p">)))[:])</span>
+	<span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+		<span class="nx">p</span><span class="p">.</span><span class="nx">count</span> <span class="p">=</span> <span class="mh">0xFFFF</span>
+		<span class="p">((</span><span class="o">*</span><span class="p">[</span><span class="nx">maxAllocSize</span><span class="p">]</span><span class="nx">pgid</span><span class="p">)(</span><span class="nx">unsafe</span><span class="p">.</span><span class="nf">Pointer</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">p</span><span class="p">.</span><span class="nx">ptr</span><span class="p">)))[</span><span class="mi">0</span><span class="p">]</span> <span class="p">=</span> <span class="nf">pgid</span><span class="p">(</span><span class="nx">lenids</span><span class="p">)</span>
+		<span class="nx">f</span><span class="p">.</span><span class="nf">copyall</span><span class="p">(((</span><span class="o">*</span><span class="p">[</span><span class="nx">maxAllocSize</span><span class="p">]</span><span class="nx">pgid</span><span class="p">)(</span><span class="nx">unsafe</span><span class="p">.</span><span class="nf">Pointer</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">p</span><span class="p">.</span><span class="nx">ptr</span><span class="p">)))[</span><span class="mi">1</span><span class="p">:])</span>
+	<span class="p">}</span>
+
+	<span class="k">return</span> <span class="kc">nil</span>
+<span class="p">}</span>
+
+<span class="c1">// copyall copies into dst a list of all free ids and all pending ids in one sorted list.
+</span><span class="c1">// f.count returns the minimum length required for dst.
+</span><span class="c1"></span><span class="kd">func</span> <span class="p">(</span><span class="nx">f</span> <span class="o">*</span><span class="nx">freelist</span><span class="p">)</span> <span class="nf">copyall</span><span class="p">(</span><span class="nx">dst</span> <span class="p">[]</span><span class="nx">pgid</span><span class="p">)</span> <span class="p">{</span>
+	<span class="nx">m</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">(</span><span class="nx">pgids</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="nx">f</span><span class="p">.</span><span class="nf">pending_count</span><span class="p">())</span>
+	<span class="k">for</span> <span class="nx">_</span><span class="p">,</span> <span class="nx">list</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">f</span><span class="p">.</span><span class="nx">pending</span> <span class="p">{</span>
+		<span class="nx">m</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">m</span><span class="p">,</span> <span class="nx">list</span><span class="o">...</span><span class="p">)</span>
+	<span class="p">}</span>
+	<span class="nx">sort</span><span class="p">.</span><span class="nf">Sort</span><span class="p">(</span><span class="nx">m</span><span class="p">)</span>
+	<span class="nf">mergepgids</span><span class="p">(</span><span class="nx">dst</span><span class="p">,</span> <span class="nx">f</span><span class="p">.</span><span class="nx">ids</span><span class="p">,</span> <span class="nx">m</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="c1">// mergepgids copies the sorted union of a and b into dst.
+</span><span class="c1">// If dst is too small, it panics.
+</span><span class="c1"></span><span class="kd">func</span> <span class="nf">mergepgids</span><span class="p">(</span><span class="nx">dst</span><span class="p">,</span> <span class="nx">a</span><span class="p">,</span> <span class="nx">b</span> <span class="nx">pgids</span><span class="p">)</span> <span class="p">{</span>
+	<span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="nx">dst</span><span class="p">)</span> <span class="p">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="nx">a</span><span class="p">)</span><span class="o">+</span><span class="nb">len</span><span class="p">(</span><span class="nx">b</span><span class="p">)</span> <span class="p">{</span>
+		<span class="nb">panic</span><span class="p">(</span><span class="nx">fmt</span><span class="p">.</span><span class="nf">Errorf</span><span class="p">(</span><span class="s">&#34;mergepgids bad len %d &lt; %d + %d&#34;</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="nx">dst</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="nx">a</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="nx">b</span><span class="p">)))</span>
+	<span class="p">}</span>
+	<span class="c1">// Copy in the opposite slice if one is nil.
+</span><span class="c1"></span>	<span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="nx">a</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span> <span class="p">{</span>
+		<span class="nb">copy</span><span class="p">(</span><span class="nx">dst</span><span class="p">,</span> <span class="nx">b</span><span class="p">)</span>
+		<span class="k">return</span>
+	<span class="p">}</span>
+	<span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="nx">b</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span> <span class="p">{</span>
+		<span class="nb">copy</span><span class="p">(</span><span class="nx">dst</span><span class="p">,</span> <span class="nx">a</span><span class="p">)</span>
+		<span class="k">return</span>
+	<span class="p">}</span>
+
+	<span class="c1">// Merged will hold all elements from both lists.
+</span><span class="c1"></span>	<span class="nx">merged</span> <span class="o">:=</span> <span class="nx">dst</span><span class="p">[:</span><span class="mi">0</span><span class="p">]</span>
+
+	<span class="c1">// Assign lead to the slice with a lower starting value, follow to the higher value.
+</span><span class="c1"></span>	<span class="nx">lead</span><span class="p">,</span> <span class="nx">follow</span> <span class="o">:=</span> <span class="nx">a</span><span class="p">,</span> <span class="nx">b</span>
+	<span class="k">if</span> <span class="nx">b</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="p">&lt;</span> <span class="nx">a</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="p">{</span>
+		<span class="nx">lead</span><span class="p">,</span> <span class="nx">follow</span> <span class="p">=</span> <span class="nx">b</span><span class="p">,</span> <span class="nx">a</span>
+	<span class="p">}</span>
+
+	<span class="c1">// Continue while there are elements in the lead.
+</span><span class="c1"></span>	<span class="k">for</span> <span class="nb">len</span><span class="p">(</span><span class="nx">lead</span><span class="p">)</span> <span class="p">&gt;</span> <span class="mi">0</span> <span class="p">{</span>
+		<span class="c1">// Merge largest prefix of lead that is ahead of follow[0].
+</span><span class="c1"></span>		<span class="nx">n</span> <span class="o">:=</span> <span class="nx">sort</span><span class="p">.</span><span class="nf">Search</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="nx">lead</span><span class="p">),</span> <span class="kd">func</span><span class="p">(</span><span class="nx">i</span> <span class="kt">int</span><span class="p">)</span> <span class="kt">bool</span> <span class="p">{</span> <span class="k">return</span> <span class="nx">lead</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span> <span class="p">&gt;</span> <span class="nx">follow</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="p">})</span>
+		<span class="nx">merged</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">merged</span><span class="p">,</span> <span class="nx">lead</span><span class="p">[:</span><span class="nx">n</span><span class="p">]</span><span class="o">...</span><span class="p">)</span>
+		<span class="k">if</span> <span class="nx">n</span> <span class="o">&gt;=</span> <span class="nb">len</span><span class="p">(</span><span class="nx">lead</span><span class="p">)</span> <span class="p">{</span>
+			<span class="k">break</span>
+		<span class="p">}</span>
+
+		<span class="c1">// Swap lead and follow.
+</span><span class="c1"></span>		<span class="nx">lead</span><span class="p">,</span> <span class="nx">follow</span> <span class="p">=</span> <span class="nx">follow</span><span class="p">,</span> <span class="nx">lead</span><span class="p">[</span><span class="nx">n</span><span class="p">:]</span>
+	<span class="p">}</span>
+
+	<span class="c1">// Append what&#39;s left in follow.
+</span><span class="c1"></span>	<span class="nx">_</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">merged</span><span class="p">,</span> <span class="nx">follow</span><span class="o">...</span><span class="p">)</span>
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div>
+    </div>
+
+    
+<footer class="post-footer">
+      <div class="post-tags">
+          <a href="/tags/go/">go</a>
+          <a href="/tags/bolt/">bolt</a>
+          </div>
+      <nav class="post-nav">
+        <a class="prev" href="/post/bolt2_reading/">
+            <i class="iconfont icon-left"></i>
+            <span class="prev-text nav-default">Bolt源码分析（二）--数据结构解读</span>
+            <span class="prev-text nav-mobile">上一篇</span>
+          </a>
+        <a class="next" href="/post/go-asm/">
+            <span class="next-text nav-default">Go Asm</span>
+            <span class="next-text nav-mobile">下一篇</span>
+            <i class="iconfont icon-right"></i>
+          </a>
+      </nav>
+    </footer>
+  </article>
+        </div>
+        
+
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="social-links">
+      <a href="mailto:liracle1@126.com" class="iconfont icon-email" title="email"></a>
+      <a href="https://github.com/liracle/" class="iconfont icon-github" title="github"></a>
+  <a href="https://www.ipeapea.cn/index.xml" type="application/rss+xml" class="iconfont icon-rss" title="rss"></a>
+</div>
+
+<div class="copyright">
+  
+
+  <div class="busuanzi-footer">
+    <span id="busuanzi_container_site_pv"> 本站总访问量 <span id="busuanzi_value_site_pv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> 次 </span>
+      <span class="division">|</span>
+    <span id="busuanzi_container_site_uv"> 本站总访客数 <span id="busuanzi_value_site_uv"><img src="/img/spinner.svg" alt="spinner.svg"/></span> 人 </span>
+  </div>
+
+  <span class="copyright-year">
+    &copy; 
+    2021<span class="heart"><i class="iconfont icon-heart"></i></span><span>CopyRight@2010-2030 ipeapea.cn 蜀ICP备2021020797号</span>
+  </span>
+</div>
+
+    </footer>
+
+    <div class="back-to-top" id="back-to-top">
+      <i class="iconfont icon-up"></i>
+    </div>
+  </div>
+  
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.2.1/dist/jquery.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/slideout@1.0.1/dist/slideout.min.js" integrity="sha256-t+zJ/g8/KXIJMjSVQdnibt4dlaDxc9zXr/9oNPeWqdg=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.js" integrity="sha256-XVLffZaxoWfGUEbdzuLi7pwaUJv1cecsQJQqGLe7axY=" crossorigin="anonymous"></script>
+
+
+
+<script type="text/javascript" src="/js/main.min.c99b103c33d1539acf3025e1913697534542c4a5aa5af0ccc20475ed2863603b.js"></script>
+
+
+
+
+
+
+
+
+</body>
+</html>
